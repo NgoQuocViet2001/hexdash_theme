@@ -493,6 +493,79 @@ const BannerCardWrap = Styled.div`
         }
     }
 `;
+const CustomBannerCardWrap = Styled.div`
+position: relative
+margin-bottom:
+@media only screen and (max-width: 1199px){
+    margin-bottom: 50px !important;
+}
+@media only screen and (max-width: 991px){
+    margin-bottom: 30px !important;
+}
+h2{
+    font-size: 30px;
+    font-weight: 600;
+    color: #fff !important;
+    margin-bottom: 20px;
+    z-index: 2;
+}
+.banner-card-inner{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    padding: 38px 40px 40px 40px;
+    min-height: 280px;
+    border-radius: 10px;
+    @media only screen and (max-width: 575px){
+        padding: 28px 30px 30px 30px;
+    }
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.08); /* Màu sắc và độ mờ của overlay */
+        z-index: 1; 
+    }
+    &.theme-2{
+        h2{
+            margin-bottom: 18px;
+        }
+        p{
+            font-size: 15px;
+            color: #fff !important;
+            opacity: .70;
+            max-width: 290px;
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+        img{
+            max-width: 285px;
+            z-index: 2;
+        }
+    }
+    button{
+        position: absolute;
+        bottom: 44px;
+        height: 44px;
+        width: 100px;
+        font-size: 15px;
+        font-weight: 500;
+        color: white;
+        z-index: 2; /* Đảm bảo button hiển thị phía trên overlay */
+    }
+    img{
+        position: absolute;
+        bottom: 0;
+        max-width: 460px;
+        ${({ theme }) => (theme.rtl ? 'left' : 'right')}: 0;
+        z-index: 2; /* Đảm bảo img hiển thị phía trên overlay */
+    }
+}
+`;
 
 const BannerCtaWrap = Styled.div`
     border-radius: 10px;
@@ -629,5 +702,6 @@ export {
   BannerLongWrap,
   BannerCardWrap,
   BannerCtaWrap,
-  PageHeader
+  PageHeader,
+  CustomBannerCardWrap,
 };

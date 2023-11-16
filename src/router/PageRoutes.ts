@@ -102,6 +102,11 @@ export default [
     component: () => import( '@/views/pages/Changelog.vue'),
   },
   {
+    path: '/challenge',
+    name: 'challenge',
+    component: () => import( '@/views/pages/Challenge.vue'),
+  },
+  {
     path: '/page/blog',
     name: 'blog',
     component: () => import( '@/views/pages/blog/Index.vue'),
