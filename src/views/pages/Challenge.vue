@@ -433,6 +433,7 @@ let rowPage = ref<HTMLElement | null>(null);
 // MOUNTED
 onMounted(() => {
     updateSizeItemImg();
+    window.addEventListener("resize",() => updateSizeItemImg());
 });
 
 
@@ -569,7 +570,7 @@ const getRankingStyle = (order: any) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 112vh;
+    min-height: 112vh;
 }
 
 .tab-content {
