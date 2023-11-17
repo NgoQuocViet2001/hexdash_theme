@@ -41,6 +41,7 @@
                                                 <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
                                                 <a-select-option value="ended">Đã diễn ra</a-select-option>
                                             </a-select> 
+                                            <div v-else style="height: 2.375rem;"></div>
                                     </div>
                                     <div v-if="activeKey === tab.id" class="tab-content" >
                                         <a-row :gutter=[32,24] v-if="tab.id === 1 || tab.id === 2" :class= "`tab-list tab-list-${selectState}`">
@@ -568,7 +569,7 @@ const getRankingStyle = (order: any) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 110vh;
+    height: 112vh;
 }
 
 .tab-content {
@@ -585,7 +586,7 @@ const getRankingStyle = (order: any) => {
 }
 .select-status {
     width: 140px;
-    align-self: start;
+    align-self: flex-start;
     margin-bottom: 10px;
     margin-left: 2px;
 }
@@ -696,4 +697,5 @@ const getRankingStyle = (order: any) => {
 .ranking-medal {
     width: 30px;
 }
+
 </style>
