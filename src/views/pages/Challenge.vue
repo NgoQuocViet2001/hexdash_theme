@@ -17,7 +17,7 @@
             <div class="create-challenge">
                 <h2>Bắt đầu thử thách</h2>
                 <a-row :gutter=[16,8]>
-                    <a-col :xxl="8" :xl="8" :xs="24" v-for=" item  in  challengeItems " :key="item.title">
+                    <a-col :xxl="8" :xl="8" :lg="12" :md="12" :sm="24" :xs="24" v-for=" item  in  challengeItems " :key="item.title">
                         <ChallengeCard :backgroundImage="item.backgroundImage" :title="item.title" :desc="item.desc"
                             :btnText="item.btnText" :btnClick="() => showModal(item.id)" />
                     </a-col>
@@ -29,24 +29,22 @@
             <!-- Phần giữa: Thử thách đang diễn ra và ranking -->
             <div class="challenge-info">
                 <a-row :gutter=[16,8]>
-                    <a-col :xxl="18" :xl="24" :xs="24">
+                    <a-col :xxl="18" :xl="18" :lg="24" :md="24" :sm="24" :xs="24">
                         <div class="challenge-inprogress">
                             <h2>Thử thách đang diễn ra</h2>
                             <TabBasic v-model:activeKey="activeKey">
                                 <Child v-for="(tab, index) in tabs" :key="index + 1">
                                     <template #tab><span class="tab-label">{{ tab.label }}</span></template>
-                                    <div class="select-status">
-                        
-                                            <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%" @change="handleChangeStatus">
+                                    <div class="select-status">                       
+                                            <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%" >
                                                 <a-select-option value="happening">Đang diễn ra</a-select-option>
                                                 <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
                                                 <a-select-option value="ended">Đã diễn ra</a-select-option>
-                                            </a-select>
-    
+                                            </a-select> 
                                     </div>
                                     <div v-if="activeKey === tab.id" class="tab-content" >
-                                        <a-row :gutter=[16,24] v-if="tab.id === 1 || tab.id === 2" :class= "`tab-list tab-list-${selectState}`">
-                                            <a-col :xxl="12" :xl="12" :xs="24"
+                                        <a-row :gutter=[32,24] v-if="tab.id === 1 || tab.id === 2" :class= "`tab-list tab-list-${selectState}`">
+                                            <a-col :xxl="12" :xl="24" :lg="12" :md="24" :sm="24" :xs="24"
                                                 v-for="(item, index) in tab.id === 1 ? displayedTournamentItems : displayedSoloItems"
                                                 :key="index">
                                                 <div class="challenge-inprogress-card">
@@ -89,7 +87,7 @@
                             </TabBasic>
                         </div>
                     </a-col>
-                    <a-col :xxl="6" :xl="24" :xs="24">
+                    <a-col :xxl="6" :xl="6" :lg="24" :md="24" :sm="24" :xs="24">
                         <div class="ranking-top">
                             <div class="ranking-title">
                                 <h2 style="margin-bottom: 8px;">Bảng xếp hạng</h2>
@@ -425,30 +423,17 @@ let upcomingTourCurrentPage = ref(1);
 let endedTourCurrentPage = ref(1);
 
 let activeKey = ref(1);
-// let tournamentCurrentPage = ref(1);
 let soloCurrentPage = ref(1);
 const tournamentPageSize = ref(12);
 const soloPageSize = ref(12);
 let viewMore = ref(false);
 
-let happeningTourHeight = ref(0);
-let upcomingTourHeight = ref(0);
-let endedTourHeight = ref(0);
-let soloPageHeight = ref(0);
 let rowPage = ref<HTMLElement | null>(null);
-// let watched = ref(false);
 // MOUNTED
 onMounted(() => {
     updateSizeItemImg();
 });
 
-//WATCH
-// watch(() => activeKey.value, async () => {
-//     if (!watched.value) {
-//         setSoloPageHeight();
-//         watched.value = true;
-//     }
-// });
 
 //COMPUTED
 const tournamentTotalItems = computed(() => {
@@ -503,30 +488,18 @@ function handleOk() {
 function handleCancel() {
     modalState.visible = false;
 }
-const handleChangeStatus = (page: any) => {
-    if(selectState.value == 'happening') 
-        setHappeningHeight();
-    if(selectState.value == 'upcoming') 
-        setUpcomingHeight();
-    if(selectState.value == 'ended') 
-        setEndedHeight();
 
-};
 const handleHappeningPage = (page: any) => {
     happeningTourCurrentPage.value = page;
-    setHappeningHeight();
 };
 const handleUpcomingPage = (page: any) => {
     upcomingTourCurrentPage.value = page;
-    setUpcomingHeight();
 };
 const handleEndedChange = (page: any) => {
     endedTourCurrentPage.value = page;
-    setEndedHeight();
 };
 const handleSoloPageChange = (page: any) => {
     soloCurrentPage.value = page;
-    setSoloPageHeight();
 };
 const toggleViewMore = () => {
     viewMore.value = !viewMore.value;
@@ -554,57 +527,6 @@ const updateSizeItemImg = () => {
     }
 };
 
-const setHappeningHeight = async () => {
-    // const childage = document.querySelector(`.tab-list-${selectState}`);
-    const page = document.querySelector('.ant-tabs-tabpane-active');
-    if (!page || !(page instanceof HTMLElement)) return;
-    const pageHeight = page.clientHeight;
-        const maxHeight = happeningTourHeight.value;
-        if (pageHeight > maxHeight) {
-            happeningTourHeight.value = pageHeight;
-            rowPage.value = page;
-        }
-        (page as HTMLElement).style.minHeight = `${happeningTourHeight.value}px`;
-};
-const setUpcomingHeight = async () => {
-    // const page = document.querySelector('.tab-list-${selectState}');
-    const page = document.querySelector('.ant-tabs-tabpane-active');
-    if (!page || !(page instanceof HTMLElement)) return;
-    const pageHeight = page.clientHeight;
-        const maxHeight = upcomingTourHeight.value;
-        if (pageHeight > maxHeight) {
-            upcomingTourHeight.value = pageHeight;
-            rowPage.value = page;
-        }
-        (page as HTMLElement).style.minHeight = `${upcomingTourHeight.value}px`;
-
-};
-const setEndedHeight = async () => {
-    // const page = document.querySelector('.tab-list-${selectState}');
-    const page = document.querySelector('.ant-tabs-tabpane-active');
-    if (!page || !(page instanceof HTMLElement)) return;
-
-    const pageHeight = page.clientHeight;
-        const maxHeight = endedTourHeight.value;
-        if (pageHeight > maxHeight) {
-            endedTourHeight.value = pageHeight;
-            rowPage.value = page;
-        }
-        (page as HTMLElement).style.minHeight = `${endedTourHeight.value}px`;
-
-};
-const setSoloPageHeight = async () => {
-    const page = document.querySelector('.ant-tabs-tabpane-active');
-    if (!page || !(page instanceof HTMLElement)) return;
-
-    const pageHeight = page.clientHeight;
-    const maxHeight = soloPageHeight.value;
-    if (pageHeight > maxHeight) {
-        soloPageHeight.value = pageHeight;
-        rowPage.value = page;
-    }
-    (page as HTMLElement).style.height = `${soloPageHeight.value}px`;
-};
 const getRankingStyle = (order: any) => {
     let color, icon;
     switch (order) {
@@ -646,6 +568,7 @@ const getRankingStyle = (order: any) => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 110vh;
 }
 
 .tab-content {
@@ -669,13 +592,14 @@ const getRankingStyle = (order: any) => {
 .challenge-inprogress-card {
     display: flex;
     align-items: center;
-    background-color: #f5f5f5;
+    background-color: #f5eefb;
     border-radius: 10px;
     padding-right: 10px;
+    border: 1px solid #d5acfa;
 }
 
 .challenge-inprogress-card:hover {
-    background-color: #ddd;
+    background-color: #f1e4fc;
     opacity: 0.85;
 }
 
@@ -712,6 +636,7 @@ const getRankingStyle = (order: any) => {
 
 /* set cứng */
 .challenge-inprogress-img {
+    background-color: #071a37;
     width: var(--challenge-img-width);
     height: var(--challenge-img-height);
     object-fit: cover;
