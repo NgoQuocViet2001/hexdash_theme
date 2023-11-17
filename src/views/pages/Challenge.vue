@@ -698,5 +698,4 @@ const getRankingStyle = (order: any) => {
 .ranking-medal {
     width: 30px;
 }
-
 </style>
