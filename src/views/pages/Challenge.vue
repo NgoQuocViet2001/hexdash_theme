@@ -17,18 +17,18 @@
             <div class="create-challenge">
                 <h2>Bắt đầu thử thách</h2>
                 <a-row :gutter=[16,8]>
-                    <a-col :xxl="8" :xl="8" :lg="12" :md="12" :sm="24" :xs="24" v-for=" item  in  challengeItems " :key="item.title">
+                    <a-col :xxl="8" :xl="8" :lg="12" :md="24" :sm="24" :xs="24" v-for=" item  in  challengeItems " :key="item.title">
                         <ChallengeCard :backgroundImage="item.backgroundImage" :title="item.title" :desc="item.desc"
                             :btnText="item.btnText" :btnClick="() => showModal(item.id)" />
                     </a-col>
-                    <CreateChallengeModal :type="modalType" :visible="modalState.visible" :onOk="handleOk" :onCancel="handleCancel"
+                    <CreateChallengeModal :type="modalState.type" :visible="modalState.visible" :onOk="handleOk" :onCancel="handleCancel"
                     :modalID="modalState.currentModalID" :formState="modalState.formState" />
                 </a-row>
             </div>
     
             <!-- Phần giữa: Thử thách đang diễn ra và ranking -->
             <div class="challenge-info">
-                <a-row :gutter=[16,8]>
+                <a-row :gutter=[24,8]>
                     <a-col :xxl="18" :xl="18" :lg="24" :md="24" :sm="24" :xs="24">
                         <div class="challenge-inprogress">
                             <h2>Thử thách đang diễn ra</h2>
@@ -36,7 +36,7 @@
                                 <Child v-for="(tab, index) in tabs" :key="index + 1">
                                     <template #tab><span class="tab-label">{{ tab.label }}</span></template>
                                     <div class="select-status">                       
-                                            <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%" >
+                                            <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%" @change="handleChangeSelectStatus">
                                                 <a-select-option value="happening">Đang diễn ra</a-select-option>
                                                 <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
                                                 <a-select-option value="ended">Đã diễn ra</a-select-option>
@@ -44,15 +44,18 @@
                                             <div v-else style="height: 2.375rem;"></div>
                                     </div>
                                     <div v-if="activeKey === tab.id" class="tab-content" >
-                                        <a-row :gutter=[32,24] v-if="tab.id === 1 || tab.id === 2" :class= "`tab-list tab-list-${selectState}`">
-                                            <a-col :xxl="12" :xl="24" :lg="12" :md="24" :sm="24" :xs="24"
-                                                v-for="(item, index) in tab.id === 1 ? displayedTournamentItems : displayedSoloItems"
+                                        <a-row :gutter=[16,16] v-if="tab.id === 1 || tab.id === 2" class= "tab-list">
+                                            <a-col :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24"
+                                                v-for="(item, index) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
+                        tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
+                        tab.id === 1 && selectState === 'ended' ? displayEndedTour :
+                        tab.id === 2 ? displayedSoloItems : [])"
                                                 :key="index">
                                                 <div class="challenge-inprogress-card">
                                                     <div class="challenge-inprogress-info">
                                                         <img :src="item.poster" alt="Poster" class="challenge-inprogress-img" />
                                                         <div class="challenge-inprogress-detail">
-                                                            <h3>{{ item.title }}</h3>
+                                                            <h3 class="truncate-text">{{ item.title }}</h3>
                                                             <p>{{ item.startTime }}</p>
                                                         </div>
                                                     </div>
@@ -63,23 +66,23 @@
                                         </a-row>
                                     </div>
                                     <div class="pagination-wrapper">
-                                        <sdCards v-if="tab.id == 1 && selectState == 'happening'" class="challenge-pagination">
-                                            <a-pagination v-model="happeningTourCurrentPage" :total="tournamentTotalItems"
+                                        <sdCards v-show="tab.id == 1 && selectState == 'happening'" class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.happening" :total="happeningTourItems"
                                                 :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleHappeningPage" />
                                         </sdCards>
-                                        <sdCards v-if="tab.id == 1 && selectState == 'upcoming'" class="challenge-pagination">
-                                            <a-pagination v-model="upcomingTourCurrentPage" :total="tournamentTotalItems"
+                                        <sdCards v-show="tab.id == 1 && selectState == 'upcoming'" class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.upcoming" :total="upcomingTourItems"
                                                 :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleUpcomingPage" />
                                         </sdCards>
-                                        <sdCards v-if="tab.id == 1 && selectState == 'ended'" class="challenge-pagination">
-                                            <a-pagination v-model="endedTourCurrentPage" :total="tournamentTotalItems"
+                                        <sdCards v-show="tab.id == 1 && selectState == 'ended'" class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.ended" :total="endedTourItems"
                                                 :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleEndedChange" />
                                         </sdCards>
-                                        <sdCards v-if="tab.id == 2" class="challenge-pagination">
-                                            <a-pagination v-model="soloCurrentPage" :total="soloTotalItems"
+                                        <sdCards v-show="tab.id == 2" class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.solo.current" :total="soloTotalItems"
                                                 :show-size-changer="false" :pageSize="soloPageSize" show-less-items
                                                 @change="handleSoloPageChange" />
                                         </sdCards>
@@ -114,8 +117,7 @@
                                     </div>
                                 </template>
                             </a-list>
-                            <Buttons class="btn-ranking-view" type="primary" @click="toggleViewMore">{{ viewMore ? 'Ẩn bớt' :
-        'Xem thêm' }}</Buttons>
+                            <Buttons class="btn-ranking-view" type="primary" @click="toggleViewMore">{{ viewMore ? 'Ẩn bớt' : 'Xem thêm' }}</Buttons>
                         </div>
                     </a-col>
                 </a-row>
@@ -135,45 +137,6 @@ import { TabBasic, Child } from "@/components/tabs/Style";
 import { ref, computed, onMounted, reactive } from 'vue';
 
 // DATA
-//formstate
-const modalState = reactive({
-    currentModalID: 0,
-    formState: computed(() => {
-        switch (modalState.currentModalID) {
-            case 1:
-                return tournamentFormState;
-            case 2:
-                return soloFormState;
-            case 3:
-                return trainFormState;
-            default:
-                return tournamentFormState;
-        }
-    }),
-    visible: false,
-});
-const tournamentFormState = reactive({
-    description: '',
-    start: '',
-    end: '',
-    level: '',
-    challengeTime: '',
-});
-const soloFormState = reactive({
-    description: '',
-    start: '',
-    end: '',
-    level: '',
-    challengeTime: '',
-});
-const trainFormState = reactive({
-    description: '',
-    start: '',
-    end: '',
-    level: '',
-    challengeTime: '',
-});
-
 
 // Dữ liệu mẫu cho phần Tạo thử thách
 const challengeItems = [
@@ -412,74 +375,137 @@ const topRankingUsers = Array.from({ length: 20 }, (_, index) => ({
 }));
 
 //REFS
-// const currentModalID = ref(-1);
-let modalType = ref('primary');
-// let visible = ref(false);
-let confirmLoading = ref(false);
-
-
-let selectState = ref('happening');
-let happeningTourCurrentPage = ref(1);
-let upcomingTourCurrentPage = ref(1);
-let endedTourCurrentPage = ref(1);
-
+//formstate
+const modalState = reactive({
+    currentModalID: 0,
+    formState: computed(() => {
+        switch (modalState.currentModalID) {
+            case 1:
+                return tournamentFormState;
+            case 2:
+                return soloFormState;
+            case 3:
+                return trainFormState;
+            default:
+                return tournamentFormState;
+        }
+    }),
+    visible: false,
+    type: 'primary',
+});
+const tournamentFormState = reactive({
+    description: '',
+    start: '',
+    end: '',
+    level: '',
+    challengeTime: '',
+});
+const soloFormState = reactive({
+    description: '',
+    start: '',
+    end: '',
+    level: '',
+    challengeTime: '',
+});
+const trainFormState = reactive({
+    description: '',
+    start: '',
+    end: '',
+    level: '',
+    challengeTime: '',
+});
 let activeKey = ref(1);
-let soloCurrentPage = ref(1);
+let confirmLoading = ref(false);
+let selectState = ref('happening');
+const currentPageState  = reactive({
+    tournament: {
+        happening: 1,
+        upcoming: 1,
+        ended: 1
+    },
+    solo: {
+        current: 1
+    }
+})
+// let soloCurrentPage = ref(1);
 const tournamentPageSize = ref(12);
 const soloPageSize = ref(12);
 let viewMore = ref(false);
 
-let rowPage = ref<HTMLElement | null>(null);
 // MOUNTED
 onMounted(() => {
-    updateSizeItemImg();
-    window.addEventListener("resize",() => updateSizeItemImg());
+    console.log(displayHappeningTour.value);
+    console.log(displayUpcomingTour.value);
+    console.log(displayEndedTour.value);
+
 });
 
 
 //COMPUTED
-const tournamentTotalItems = computed(() => {
+// const tournamentTotalItems = computed(() => {
+//     const items = challengeInProgress.tournament;
+//     return items.filter(item => item.status === selectState.value).length;
+// });
+const happeningTourItems = computed(() => {
     const items = challengeInProgress.tournament;
-    return items.filter(item => item.status === selectState.value).length;
+    return items.filter(item => item.status === 'happening').length;
+});
+const upcomingTourItems = computed(() => {
+    const items = challengeInProgress.tournament;
+    return items.filter(item => item.status === 'upcoming').length;
+});
+const endedTourItems = computed(() => {
+    const items = challengeInProgress.tournament;
+    return items.filter(item => item.status === 'ended').length;
 });
 const soloTotalItems = computed(() => {
     const items = challengeInProgress.solo;
     return items.length;
 });
-const displayedTournamentItems = computed(() => {
-    let tournamentCurrentPage = 1;
-    if (selectState.value === 'happening') {
-        tournamentCurrentPage = happeningTourCurrentPage.value;
-    } else if (selectState.value === 'upcoming') {
-        tournamentCurrentPage = upcomingTourCurrentPage.value;
-    } else if (selectState.value === 'ended') {
-        tournamentCurrentPage = endedTourCurrentPage.value;
-    }
-    const items = challengeInProgress.tournament;
-    const startIndex = (tournamentCurrentPage - 1) * soloPageSize.value;
-    const endIndex = startIndex + soloPageSize.value;
-    return items.filter(item => item.status === selectState.value).slice(startIndex, endIndex);
+const displayHappeningTour = computed(() => {
+  const currentPage = currentPageState.tournament.happening;
+  const items = challengeInProgress.tournament;
+  const startIndex = (currentPage - 1) * soloPageSize.value;
+  const endIndex = startIndex + soloPageSize.value;
+  return items.filter(item => item.status === 'happening').slice(startIndex, endIndex);
+});
+
+const displayUpcomingTour = computed(() => {
+  const currentPage = currentPageState.tournament.upcoming;
+  const items = challengeInProgress.tournament;
+  const startIndex = (currentPage - 1) * soloPageSize.value;
+  const endIndex = startIndex + soloPageSize.value;
+  return items.filter(item => item.status === 'upcoming').slice(startIndex, endIndex);
+});
+
+const displayEndedTour = computed(() => {
+  const currentPage = currentPageState.tournament.ended;
+  const items = challengeInProgress.tournament;
+  const startIndex = (currentPage - 1) * soloPageSize.value;
+  const endIndex = startIndex + soloPageSize.value;
+  return items.filter(item => item.status === 'ended').slice(startIndex, endIndex);
 });
 
 
 const displayedSoloItems = computed(() => {
     const items = challengeInProgress.solo;
-    const startIndex = (soloCurrentPage.value - 1) * soloPageSize.value;
+    const startIndex = (currentPageState.solo.current - 1) * soloPageSize.value;
     const endIndex = startIndex + soloPageSize.value;
     return items.slice(startIndex, endIndex);
 });
+
 let selectTopRankingUsers = computed(() => {
     return viewMore.value ? topRankingUsers : topRankingUsers.slice(0, 10);
 });
 
 
 //METHODS
-function showModal(id: number) {
+const showModal=(id: number) => {
     modalState.currentModalID = id;
     modalState.visible = true;
 }
 
-function handleOk() {
+const handleOk = () => {
     confirmLoading.value = true;
     setTimeout(() => {
         modalState.visible = false;
@@ -487,47 +513,29 @@ function handleOk() {
     }, 2000);
 }
 
-function handleCancel() {
+const handleCancel = () => {
     modalState.visible = false;
 }
-
 const handleHappeningPage = (page: any) => {
-    happeningTourCurrentPage.value = page;
+    currentPageState.tournament.happening = page;
 };
 const handleUpcomingPage = (page: any) => {
-    upcomingTourCurrentPage.value = page;
+    currentPageState.tournament.upcoming = page;
 };
 const handleEndedChange = (page: any) => {
-    endedTourCurrentPage.value = page;
+    currentPageState.tournament.ended = page;
 };
 const handleSoloPageChange = (page: any) => {
-    soloCurrentPage.value = page;
+    currentPageState.solo.current = page;
 };
 const toggleViewMore = () => {
     viewMore.value = !viewMore.value;
 }
-const getAspectRatio = () => {
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    return screenWidth / screenHeight;
+const handleChangeSelectStatus = () => {
+    console.log(displayHappeningTour.value);
+    console.log(displayUpcomingTour.value);
+    console.log(displayEndedTour.value);
 }
-const updateSizeItemImg = () => {
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const newAspectRatio = getAspectRatio();
-    if (newAspectRatio < 0.6) {
-        document.documentElement.style.setProperty('--challenge-img-width', `${screenWidth / 3}px`);
-        document.documentElement.style.setProperty('--challenge-img-height', `${screenWidth / 2 * newAspectRatio}px`);
-    }
-    else if (newAspectRatio >= 0.6 && newAspectRatio < 1) {
-        document.documentElement.style.setProperty('--challenge-img-width', `${screenWidth * 5 / 12}px`);
-        document.documentElement.style.setProperty('--challenge-img-height', `${screenWidth * 5 / 12 * newAspectRatio}px`);
-    }
-    else {
-        document.documentElement.style.setProperty('--challenge-img-height', `${screenHeight / 15 * 2}px`);
-        document.documentElement.style.setProperty('--challenge-img-width', `${screenHeight / 15 * 2 * newAspectRatio}px`);
-    }
-};
 
 const getRankingStyle = (order: any) => {
     let color, icon;
@@ -552,8 +560,17 @@ const getRankingStyle = (order: any) => {
 </script>
 
 <style scoped>
+.truncate-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    -webkit-line-clamp: 2; /* Hiển thị tối đa 2 dòng */
+    text-overflow: ellipsis;
+  }
+
+
 .challenge-container {
-    padding-top: 16px;
+    padding: 16px 30px 0;
 }
 
 .create-challenge,
@@ -579,14 +596,14 @@ const getRankingStyle = (order: any) => {
 }
 
 .tab-label {
-    font-size: 20px;
+    font-size: 1.25rem;
 }
 
 .challenge-inprogress {
     padding: 12px 24px 0;
 }
 .select-status {
-    width: 140px;
+    width: 8.75rem;
     align-self: flex-start;
     margin-bottom: 10px;
     margin-left: 2px;
@@ -636,11 +653,10 @@ const getRankingStyle = (order: any) => {
     color: #8231d3;
 }
 
-/* set cứng */
+
 .challenge-inprogress-img {
-    background-color: #071a37;
-    width: var(--challenge-img-width);
-    height: var(--challenge-img-height);
+    display: block;
+    background-image: url("https://media.istockphoto.com/id/1308682666/vector/blue-gradient-soft-background.jpg?s=612x612&w=0&k=20&c=CBSD2BDe2uMi-Zm65ny6KoPKXsTPdk5K8wt_vMIb3Hc=");
     object-fit: cover;
     border-radius: 6px;
     margin-right: 16px;
@@ -673,8 +689,8 @@ const getRankingStyle = (order: any) => {
 }
 
 .ranking-user-avatar img {
-    width: 50px;
-    height: 50px;
+    width: 3.125rem;
+    height: 3.125rem;
     border-radius: 50%;
 }
 
@@ -683,19 +699,102 @@ const getRankingStyle = (order: any) => {
 }
 
 .ranking-user-title {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 500;
     margin-bottom: 8px;
     margin-top: 10px;
 }
 
 .ranking-user-description {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #666;
     margin-bottom: 4px;
 }
 
 .ranking-medal {
-    width: 30px;
+    width: 1.875rem;
+}
+
+
+
+/* responsive */
+@media (max-width: 576px) {
+    .challenge-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .challenge-inprogress-img {
+        height: calc((100vw - 78px) * 9 /16); 
+        width: 100%; 
+    }
+    .challenge-inprogress-card {
+        flex-direction: column;
+        padding-right: 0;
+    }
+    .challenge-inprogress-info {
+        width: 100%;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .challenge-inprogress-detail {
+        align-items: center;
+        align-self: center;
+    }
+}
+/* Small screens (sm) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .challenge-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .challenge-inprogress-img {
+        height: calc((100vw - 78px) * 9 /16); 
+        width: 100%; 
+    }
+    .challenge-inprogress-card {
+        flex-direction: column;
+        padding-right: 0;
+    }
+    .challenge-inprogress-info {
+        width: 100%;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .challenge-inprogress-detail {
+        align-items: center;
+        align-self: center;
+    }
+}
+
+/* Medium screens (md) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .challenge-inprogress-img {
+        height: 16.875vh; 
+        width: 30vh;  
+    }
+}
+
+/* Large screens (lg) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .challenge-inprogress-img {
+        height: 16vh; 
+        width: 28.4444vh; 
+    }
+}
+
+/* Extra-large screens (xl) */
+@media (min-width: 1200px) and (max-width: 1599px) {
+    .challenge-inprogress-img {
+        height: 20vh; 
+        width: 35.5556vh; 
+    }
+}
+
+/* Extra-extra-large screens (xxl) */
+@media (min-width: 1600px) {
+    .challenge-inprogress-img {
+        height: 14vh; 
+        width: 24.8889vh; 
+    }
 }
 </style>

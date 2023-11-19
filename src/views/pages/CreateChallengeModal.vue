@@ -1,5 +1,6 @@
 <template>
-    <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel">
+    <div :class="StyleSheet">
+        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel">
         <div class="project-modal">
             <BasicFormWrapper>
                 <div class="create-challenge-form">
@@ -21,22 +22,22 @@
                             :label="currentModal?.attendCount">
                             <a-input />
                         </a-form-item>
-                        <a-row :gutter="60">
-                            <a-col :md="12">
+                        <a-row :gutter="20">
+                            <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.start" name="challengeStart" :label="currentModal?.start">
                                     <a-date-picker v-model:value="formState.start" placeholder="mm/dd/yyyy"
                                         :format="dateFormat" />
                                 </a-form-item>
                             </a-col>
-                            <a-col :md="12">
+                            <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.end" name="challengeEnd" :label="currentModal?.end">
                                     <a-date-picker v-model:value="formState.end" placeholder="mm/dd/yyyy"
                                         :format="dateFormat" />
                                 </a-form-item>
                             </a-col>
                         </a-row>
-                        <a-row :gutter="60">
-                            <a-col :md="12">
+                        <a-row :gutter="20">
+                            <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.level" name="challengeLevel" :label="currentModal?.level">
                                     <a-select v-model:value="formState.level" style="width: 100%">
                                         <a-select-option value="ease">Dễ</a-select-option>
@@ -45,7 +46,7 @@
                                     </a-select>
                                 </a-form-item>
                             </a-col>
-                            <a-col :md="12">
+                            <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.challengeTime" name="challengeTime"
                                     :label="currentModal?.challengeTime">
                                     <a-select v-model:value="formState.challengeTime" style="width: 100%">
@@ -66,9 +67,11 @@
             </BasicFormWrapper>
         </div>
     </sdModal>
+    </div>
 </template>
 
 <script setup lang="ts">
+import StyleSheet from "ant-design-vue";
 import { computed } from 'vue';
 import { BasicFormWrapper } from '@/views/styled';
 const dateFormat = 'MM/DD/YYYY';
@@ -80,9 +83,9 @@ const props = defineProps([
     'type',
     'formState',
 ]);
-const currentModal = computed(() => modalText.find(item => item.id === props.modalID));
+const currentModal = computed(() => modalItems.find(item => item.id === props.modalID));
 
-const modalText = [
+const modalItems = [
     {
         id: 1,
         label: 'Tạo giải đấu',
@@ -113,3 +116,18 @@ const modalText = [
 ]
 
 </script>
+
+<style scoped>
+:global(.ant-modal-wrap) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+:global(.ant-modal) {
+    top: 0;
+    padding-bottom: 0;
+}
+.ant-picker {
+    width: 100%;
+}
+</style>
