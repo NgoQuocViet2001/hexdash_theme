@@ -68,22 +68,22 @@
                                     <div class="pagination-wrapper">
                                         <sdCards v-show="tab.id == 1 && selectState == 'happening'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.happening" :total="happeningTourItems"
-                                                :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
                                                 @change="handleHappeningPage" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 1 && selectState == 'upcoming'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.upcoming" :total="upcomingTourItems"
-                                                :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
                                                 @change="handleUpcomingPage" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 1 && selectState == 'ended'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.ended" :total="endedTourItems"
-                                                :show-size-changer="false" :pageSize="tournamentPageSize" show-less-items
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
                                                 @change="handleEndedChange" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 2" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.solo.current" :total="soloTotalItems"
-                                                :show-size-changer="false" :pageSize="soloPageSize" show-less-items
+                                                :showSizeChanger="false" :pageSize="soloPageSize" show-less-items hideOnSinglePage 
                                                 @change="handleSoloPageChange" />
                                         </sdCards>
                                     </div>
@@ -358,7 +358,7 @@ const challengeInProgress = {
             status: "upcoming",
         },
     ],
-    solo: Array.from({ length: 28 }, (_, index) => ({
+    solo: Array.from({ length: 70 }, (_, index) => ({
         title: `So tài ${index + 1}`,
         poster: "https://assets.leetcode.com/contest/weekly-contest-290/card_img_1654267980.png",
         startTime: "2023-11-09 10:00 AM",
@@ -434,9 +434,7 @@ let viewMore = ref(false);
 
 // MOUNTED
 onMounted(() => {
-    console.log(displayHappeningTour.value);
-    console.log(displayUpcomingTour.value);
-    console.log(displayEndedTour.value);
+    
 
 });
 
@@ -532,9 +530,6 @@ const toggleViewMore = () => {
     viewMore.value = !viewMore.value;
 }
 const handleChangeSelectStatus = () => {
-    console.log(displayHappeningTour.value);
-    console.log(displayUpcomingTour.value);
-    console.log(displayEndedTour.value);
 }
 
 const getRankingStyle = (order: any) => {
@@ -560,6 +555,22 @@ const getRankingStyle = (order: any) => {
 </script>
 
 <style scoped>
+:global(.ant-pagination-disabled button) {
+    cursor: default !important;
+}
+:global(.ant-pagination-prev.ant-pagination-disabled button svg ) {
+    fill: #9299b8 !important;
+}
+
+:global(.ant-pagination-next.ant-pagination-disabled button svg ) {
+    fill: #9299b8 !important;
+}
+:global(.ant-pagination-prev button svg) {
+    fill: black !important;
+}
+:global(.ant-pagination-next button svg) {
+    fill: black !important;
+}
 .truncate-text {
     display: -webkit-box;
     -webkit-box-orient: vertical;
