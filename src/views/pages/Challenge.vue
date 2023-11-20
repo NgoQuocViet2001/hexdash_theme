@@ -6,10 +6,10 @@
             <BreadcrumbWrapperStyle>
                 <a-breadcrumb>
                     <a-breadcrumb-item>
-                        <RouterLink to="/">Home</RouterLink>
+                        <router-link to="/" >Home</router-link>
                     </a-breadcrumb-item>
                     <a-breadcrumb-item>
-                        <RouterLink to="/challenge">Thử thách</RouterLink>
+                        <router-link to="/thuthach">Thử thách</router-link>
                     </a-breadcrumb-item>
                 </a-breadcrumb>
             </BreadcrumbWrapperStyle>
@@ -47,9 +47,9 @@
                                         <a-row :gutter=[16,16] v-if="tab.id === 1 || tab.id === 2" class= "tab-list">
                                             <a-col :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24"
                                                 v-for="(item, index) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
-                        tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
-                        tab.id === 1 && selectState === 'ended' ? displayEndedTour :
-                        tab.id === 2 ? displayedSoloItems : [])"
+                                                                        tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
+                                                                        tab.id === 1 && selectState === 'ended' ? displayEndedTour :
+                                                                        tab.id === 2 ? displayedSoloItems : [])"
                                                 :key="index">
                                                 <div class="challenge-inprogress-card">
                                                     <div class="challenge-inprogress-info">
@@ -68,22 +68,22 @@
                                     <div class="pagination-wrapper">
                                         <sdCards v-show="tab.id == 1 && selectState == 'happening'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.happening" :total="happeningTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
                                                 @change="handleHappeningPage" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 1 && selectState == 'upcoming'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.upcoming" :total="upcomingTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
                                                 @change="handleUpcomingPage" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 1 && selectState == 'ended'" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.tournament.ended" :total="endedTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items hideOnSinglePage 
+                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
                                                 @change="handleEndedChange" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 2" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.solo.current" :total="soloTotalItems"
-                                                :showSizeChanger="false" :pageSize="soloPageSize" show-less-items hideOnSinglePage 
+                                                :showSizeChanger="false" :pageSize="soloPageSize" show-less-items  
                                                 @change="handleSoloPageChange" />
                                         </sdCards>
                                     </div>
@@ -136,8 +136,9 @@ import CreateChallengeModal from "./CreateChallengeModal.vue";
 import { TabBasic, Child } from "@/components/tabs/Style";
 import { ref, computed, onMounted, reactive } from 'vue';
 
-// DATA
+//props 
 
+// DATA
 // Dữ liệu mẫu cho phần Tạo thử thách
 const challengeItems = [
     {
@@ -440,10 +441,7 @@ onMounted(() => {
 
 
 //COMPUTED
-// const tournamentTotalItems = computed(() => {
-//     const items = challengeInProgress.tournament;
-//     return items.filter(item => item.status === selectState.value).length;
-// });
+
 const happeningTourItems = computed(() => {
     const items = challengeInProgress.tournament;
     return items.filter(item => item.status === 'happening').length;
@@ -498,6 +496,7 @@ let selectTopRankingUsers = computed(() => {
 
 
 //METHODS
+
 const showModal=(id: number) => {
     modalState.currentModalID = id;
     modalState.visible = true;
@@ -555,6 +554,15 @@ const getRankingStyle = (order: any) => {
 </script>
 
 <style scoped>
+
+/* css breadcrumb mặc định */
+:global(.ant-breadcrumb .ant-breadcrumb-link a) {
+    color: black !important;
+}
+:global(.ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
+    color: #8231D3 !important;
+}
+/* css pagination */
 :global(.ant-pagination-disabled button) {
     cursor: default !important;
 }
@@ -571,14 +579,14 @@ const getRankingStyle = (order: any) => {
 :global(.ant-pagination-next button svg) {
     fill: black !important;
 }
+
 .truncate-text {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
     -webkit-line-clamp: 2; /* Hiển thị tối đa 2 dòng */
     text-overflow: ellipsis;
-  }
-
+}
 
 .challenge-container {
     padding: 16px 30px 0;

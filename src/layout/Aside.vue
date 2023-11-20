@@ -151,9 +151,26 @@ watch(
       <template #icon>
         <unicon name="brackets-curly"></unicon>
       </template>
-      <router-link to="/challenge">
+      <router-link to="/thuthach">
         Thử thách
       </router-link>
     </a-menu-item>
+    <!-- <a-menu-item @click="toggleCollapsed" key="subject">
+      <template #icon>
+        <unicon name="book-reader"></unicon>
+      </template>
+      <router-link to="/noidung/monhoc">
+        Môn học
+      </router-link>
+    </a-menu-item> -->
+    <a-menu-item @click="toggleCollapsed" key="course">
+      <template #icon>
+        <unicon name="graduation-cap"></unicon>
+      </template>
+      <router-link to="/noidung/khoahoc">
+        Khoá học
+      </router-link>
+    </a-menu-item>
    </a-menu> 
+   
 </template>

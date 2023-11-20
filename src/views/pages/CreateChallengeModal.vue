@@ -118,6 +118,7 @@ const modalItems = [
 </script>
 
 <style scoped>
+/* css modal */
 :global(.ant-modal-wrap) {
     display: flex;
     align-items: center;

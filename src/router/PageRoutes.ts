@@ -102,9 +102,19 @@ export default [
     component: () => import( '@/views/pages/Changelog.vue'),
   },
   {
-    path: '/challenge',
+    path: '/thuthach',
     name: 'challenge',
     component: () => import( '@/views/pages/Challenge.vue'),
+  },
+  {
+    path: '/noidung/khoahoc',
+    name: 'khoahoc',
+    component: () => import( '@/views/pages/KhoaHoc.vue'),
+  },
+  {
+    path: '/noidung/monhoc',
+    name: 'monhoc',
+    component: () => import( '@/views/pages/MonHoc.vue'),
   },
   {
     path: '/page/blog',
