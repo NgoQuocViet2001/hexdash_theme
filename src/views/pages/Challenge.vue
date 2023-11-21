@@ -438,8 +438,6 @@ onMounted(() => {
     
 
 });
-
-
 //COMPUTED
 
 const happeningTourItems = computed(() => {
@@ -494,14 +492,12 @@ let selectTopRankingUsers = computed(() => {
     return viewMore.value ? topRankingUsers : topRankingUsers.slice(0, 10);
 });
 
-
 //METHODS
 
 const showModal=(id: number) => {
     modalState.currentModalID = id;
     modalState.visible = true;
 }
-
 const handleOk = () => {
     confirmLoading.value = true;
     setTimeout(() => {
@@ -509,7 +505,6 @@ const handleOk = () => {
         confirmLoading.value = false;
     }, 2000);
 }
-
 const handleCancel = () => {
     modalState.visible = false;
 }
@@ -580,7 +575,7 @@ const getRankingStyle = (order: any) => {
     fill: black !important;
 }
 
-.truncate-text {
+:global(.truncate-text) {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;

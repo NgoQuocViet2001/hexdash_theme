@@ -112,7 +112,7 @@ export default [
     component: () => import( '@/views/pages/KhoaHoc.vue'),
   },
   {
-    path: '/noidung/monhoc',
+    path: '/monhoc',
     name: 'monhoc',
     component: () => import( '@/views/pages/MonHoc.vue'),
   },

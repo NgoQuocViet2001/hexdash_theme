@@ -159,7 +159,7 @@ watch(
       <template #icon>
         <unicon name="book-reader"></unicon>
       </template>
-      <router-link to="/noidung/monhoc">
+      <router-link to="/monhoc">
         Môn học
       </router-link>
     </a-menu-item> -->
