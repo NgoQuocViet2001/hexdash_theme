@@ -1,5 +1,5 @@
 <template>
-    <sdModal title="Xác nhận xoá" :type="type" :visible="visible" @cancel="handleCancel" @ok="confirmDelete">
+    <sdModal title="Xác nhận xoá" :type="type" :visible="visible" @cancel="handleCancel" @ok="confirmDelete" :bodyStyle="{overflowY: 'auto', maxHeight: '95vh'}">
         <div class="custom-delete-modal">
             <BasicFormWrapper>
                 <a-form name="delete-modal" layout="vertical">

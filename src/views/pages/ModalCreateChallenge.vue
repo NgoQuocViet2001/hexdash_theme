@@ -1,6 +1,6 @@
 <template>
     <div >
-        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel">
+        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel" :bodyStyle="{overflowY: 'auto', maxHeight: '95vh'}">
         <div class="project-modal">
             <BasicFormWrapper>
                 <div class="create-challenge-form">
