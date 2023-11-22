@@ -6,7 +6,7 @@
             <BreadcrumbWrapperStyle>
                 <a-breadcrumb>
                     <a-breadcrumb-item>
-                        <router-link to="/" >Home</router-link>
+                        <router-link to="/">Home</router-link>
                     </a-breadcrumb-item>
                     <a-breadcrumb-item>
                         <router-link to="/thuthach">Thử thách</router-link>
@@ -17,15 +17,15 @@
             <div class="create-challenge">
                 <h2>Bắt đầu thử thách</h2>
                 <a-row :gutter=[16,8]>
-                    <a-col :xxl="8" :xl="8" :lg="12" :md="24" :sm="24" :xs="24" v-for=" item  in  challengeItems " :key="item.title">
+                    <a-col :xxl="8" :xl="8" :lg="12" :md="24" :sm="24" :xs="24" v-for=" item  in  challengeItems "
+                        :key="item.title">
                         <ChallengeCard :backgroundImage="item.backgroundImage" :title="item.title" :desc="item.desc"
                             :btnText="item.btnText" :btnClick="() => showModal(item.id)" />
                     </a-col>
-                    <CreateChallengeModal :type="modalState.type" :visible="modalState.visible" :onOk="handleOk" :onCancel="handleCancel"
-                    :modalID="modalState.currentModalID" :formState="modalState.formState" />
                 </a-row>
             </div>
-    
+            <ModalCreateChallenge :type="modalState.type" :visible="modalState.visible" :onOk="() => handleOk(modalState.currentModalID)"
+                :onCancel="handleCancel" :modalID="modalState.currentModalID" :formState="modalState.formState" />
             <!-- Phần giữa: Thử thách đang diễn ra và ranking -->
             <div class="challenge-info">
                 <a-row :gutter=[24,8]>
@@ -35,25 +35,25 @@
                             <TabBasic v-model:activeKey="activeKey">
                                 <Child v-for="(tab, index) in tabs" :key="index + 1">
                                     <template #tab><span class="tab-label">{{ tab.label }}</span></template>
-                                    <div class="select-status">                       
-                                            <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%" @change="handleChangeSelectStatus">
-                                                <a-select-option value="happening">Đang diễn ra</a-select-option>
-                                                <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
-                                                <a-select-option value="ended">Đã diễn ra</a-select-option>
-                                            </a-select> 
-                                            <div v-else style="height: 2.375rem;"></div>
+                                    <div class="select-status">
+                                        <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%"
+                                            @change="handleChangeSelectStatus">
+                                            <a-select-option value="happening">Đang diễn ra</a-select-option>
+                                            <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
+                                            <a-select-option value="ended">Đã diễn ra</a-select-option>
+                                        </a-select>
+                                        <div v-else style="height: 2.375rem;"></div>
                                     </div>
-                                    <div v-if="activeKey === tab.id" class="tab-content" >
-                                        <a-row :gutter=[16,16] v-if="tab.id === 1 || tab.id === 2" class= "tab-list">
-                                            <a-col :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24"
-                                                v-for="(item, index) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
-                                                                        tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
-                                                                        tab.id === 1 && selectState === 'ended' ? displayEndedTour :
-                                                                        tab.id === 2 ? displayedSoloItems : [])"
-                                                :key="index">
+                                    <div v-if="activeKey === tab.id" class="tab-content">
+                                        <a-row :gutter=[16,16] v-if="tab.id === 1 || tab.id === 2" class="tab-list">
+                                            <a-col :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24" v-for="(item, index) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
+                                                tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
+                                                    tab.id === 1 && selectState === 'ended' ? displayEndedTour :
+                                                        tab.id === 2 ? displayedSoloItems : [])" :key="index">
                                                 <div class="challenge-inprogress-card">
                                                     <div class="challenge-inprogress-info">
-                                                        <img :src="item.poster" alt="Poster" class="challenge-inprogress-img" />
+                                                        <img :src="item.poster" alt="Poster"
+                                                            class="challenge-inprogress-img" />
                                                         <div class="challenge-inprogress-detail">
                                                             <h3 class="truncate-text">{{ item.title }}</h3>
                                                             <p>{{ item.startTime }}</p>
@@ -61,29 +61,35 @@
                                                     </div>
                                                     <span class="challenge-inprogress-status">{{ item.status }}</span>
                                                 </div>
-    
+
                                             </a-col>
                                         </a-row>
                                     </div>
                                     <div class="pagination-wrapper">
-                                        <sdCards v-show="tab.id == 1 && selectState == 'happening'" class="challenge-pagination">
-                                            <a-pagination v-model="currentPageState.tournament.happening" :total="happeningTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
+                                        <sdCards v-show="tab.id == 1 && selectState == 'happening'"
+                                            class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.happening"
+                                                :total="happeningTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleHappeningPage" />
                                         </sdCards>
-                                        <sdCards v-show="tab.id == 1 && selectState == 'upcoming'" class="challenge-pagination">
-                                            <a-pagination v-model="currentPageState.tournament.upcoming" :total="upcomingTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
+                                        <sdCards v-show="tab.id == 1 && selectState == 'upcoming'"
+                                            class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.upcoming"
+                                                :total="upcomingTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleUpcomingPage" />
                                         </sdCards>
-                                        <sdCards v-show="tab.id == 1 && selectState == 'ended'" class="challenge-pagination">
-                                            <a-pagination v-model="currentPageState.tournament.ended" :total="endedTourItems"
-                                                :showSizeChanger="false" :pageSize="tournamentPageSize" show-less-items  
+                                        <sdCards v-show="tab.id == 1 && selectState == 'ended'"
+                                            class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.tournament.ended"
+                                                :total="endedTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
                                                 @change="handleEndedChange" />
                                         </sdCards>
                                         <sdCards v-show="tab.id == 2" class="challenge-pagination">
                                             <a-pagination v-model="currentPageState.solo.current" :total="soloTotalItems"
-                                                :showSizeChanger="false" :pageSize="soloPageSize" show-less-items  
+                                                :showSizeChanger="false" :pageSize="soloPageSize" show-less-items
                                                 @change="handleSoloPageChange" />
                                         </sdCards>
                                     </div>
@@ -98,7 +104,8 @@
                             </div>
                             <a-list :item-layout="'horizontal'" :dataSource="selectTopRankingUsers">
                                 <template #renderItem="{ item }">
-                                    <div class="ranking-user" :style="{ 'border-color': getRankingStyle(item.order).color }">
+                                    <div class="ranking-user"
+                                        :style="{ 'border-color': getRankingStyle(item.order).color }">
                                         <div class="ranking-user-avatar">
                                             <img :src="item.avatar" alt="Avatar" />
                                         </div>
@@ -112,12 +119,13 @@
                                                 {{ item.name }}
                                             </h3>
                                             <p class="ranking-user-description">{{ `Elo: ${item.elo} | Attended:
-                                                                                        ${item.attended}` }}</p>
+                                                                                            ${item.attended}` }}</p>
                                         </div>
                                     </div>
                                 </template>
                             </a-list>
-                            <Buttons class="btn-ranking-view" type="primary" @click="toggleViewMore">{{ viewMore ? 'Ẩn bớt' : 'Xem thêm' }}</Buttons>
+                            <Buttons class="btn-ranking-view" type="primary" @click="toggleViewMore">{{ viewMore ? 'Ẩn bớt'
+    : 'Xem thêm' }}</Buttons>
                         </div>
                     </a-col>
                 </a-row>
@@ -132,7 +140,7 @@ import { Main } from '@/views/styled';
 import { ChallengeCard } from "@/components/banners/Banners.vue";
 import { BreadcrumbWrapperStyle } from "@/views/uiElements/ui-elements-styled";
 import Buttons from "@/components/buttons/Buttons.vue"
-import CreateChallengeModal from "./CreateChallengeModal.vue";
+import ModalCreateChallenge from "./ModalCreateChallenge.vue";
 import { TabBasic, Child } from "@/components/tabs/Style";
 import { ref, computed, onMounted, reactive } from 'vue';
 
@@ -395,30 +403,39 @@ const modalState = reactive({
     type: 'primary',
 });
 const tournamentFormState = reactive({
-    description: '',
+    challengeName: '',
+    shortDesc: '',
     start: '',
     end: '',
-    level: '',
-    challengeTime: '',
+    level: 'easy',
+    challengeTime: 'time1',
+    apiUpload: '/api/upload',
+    bannerFile: [],
 });
 const soloFormState = reactive({
-    description: '',
+    challengeName: '',
     start: '',
     end: '',
-    level: '',
-    challengeTime: '',
+    level: 'easy',
+    challengeTime: 'time1',
+
 });
 const trainFormState = reactive({
-    description: '',
+    challengeName: '',
     start: '',
     end: '',
-    level: '',
-    challengeTime: '',
+    level: 'easy',
+    challengeTime: 'time1',
+
 });
 let activeKey = ref(1);
-let confirmLoading = ref(false);
+let confirmLoading = reactive({
+    tournament: false,
+    solo: false,
+    train: false,
+});
 let selectState = ref('happening');
-const currentPageState  = reactive({
+const currentPageState = reactive({
     tournament: {
         happening: 1,
         upcoming: 1,
@@ -435,7 +452,7 @@ let viewMore = ref(false);
 
 // MOUNTED
 onMounted(() => {
-    
+
 
 });
 //COMPUTED
@@ -457,27 +474,27 @@ const soloTotalItems = computed(() => {
     return items.length;
 });
 const displayHappeningTour = computed(() => {
-  const currentPage = currentPageState.tournament.happening;
-  const items = challengeInProgress.tournament;
-  const startIndex = (currentPage - 1) * soloPageSize.value;
-  const endIndex = startIndex + soloPageSize.value;
-  return items.filter(item => item.status === 'happening').slice(startIndex, endIndex);
+    const currentPage = currentPageState.tournament.happening;
+    const items = challengeInProgress.tournament;
+    const startIndex = (currentPage - 1) * soloPageSize.value;
+    const endIndex = startIndex + soloPageSize.value;
+    return items.filter(item => item.status === 'happening').slice(startIndex, endIndex);
 });
 
 const displayUpcomingTour = computed(() => {
-  const currentPage = currentPageState.tournament.upcoming;
-  const items = challengeInProgress.tournament;
-  const startIndex = (currentPage - 1) * soloPageSize.value;
-  const endIndex = startIndex + soloPageSize.value;
-  return items.filter(item => item.status === 'upcoming').slice(startIndex, endIndex);
+    const currentPage = currentPageState.tournament.upcoming;
+    const items = challengeInProgress.tournament;
+    const startIndex = (currentPage - 1) * soloPageSize.value;
+    const endIndex = startIndex + soloPageSize.value;
+    return items.filter(item => item.status === 'upcoming').slice(startIndex, endIndex);
 });
 
 const displayEndedTour = computed(() => {
-  const currentPage = currentPageState.tournament.ended;
-  const items = challengeInProgress.tournament;
-  const startIndex = (currentPage - 1) * soloPageSize.value;
-  const endIndex = startIndex + soloPageSize.value;
-  return items.filter(item => item.status === 'ended').slice(startIndex, endIndex);
+    const currentPage = currentPageState.tournament.ended;
+    const items = challengeInProgress.tournament;
+    const startIndex = (currentPage - 1) * soloPageSize.value;
+    const endIndex = startIndex + soloPageSize.value;
+    return items.filter(item => item.status === 'ended').slice(startIndex, endIndex);
 });
 
 
@@ -494,15 +511,30 @@ let selectTopRankingUsers = computed(() => {
 
 //METHODS
 
-const showModal=(id: number) => {
+const showModal = (id: number) => {
     modalState.currentModalID = id;
     modalState.visible = true;
 }
-const handleOk = () => {
-    confirmLoading.value = true;
+const handleOk = (id: number) => {
+    switch (id) {
+        case 1:
+            confirmLoading.tournament = true;
+            break;
+        case 2:
+            confirmLoading.solo = true;
+            break;
+        case 3:
+            confirmLoading.train = true;
+            break;
+        default:
+            break;
+    }
+
     setTimeout(() => {
         modalState.visible = false;
-        confirmLoading.value = false;
+        confirmLoading.tournament = false;
+        confirmLoading.solo = false;
+        confirmLoading.train = false;
     }, 2000);
 }
 const handleCancel = () => {
@@ -550,27 +582,33 @@ const getRankingStyle = (order: any) => {
 
 <style scoped>
 
+
 /* css breadcrumb mặc định */
 :global(.ant-breadcrumb .ant-breadcrumb-link a) {
     color: black !important;
 }
+
 :global(.ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
     color: #8231D3 !important;
 }
+
 /* css pagination */
 :global(.ant-pagination-disabled button) {
     cursor: default !important;
 }
-:global(.ant-pagination-prev.ant-pagination-disabled button svg ) {
+
+:global(.ant-pagination-prev.ant-pagination-disabled button svg) {
     fill: #9299b8 !important;
 }
 
-:global(.ant-pagination-next.ant-pagination-disabled button svg ) {
+:global(.ant-pagination-next.ant-pagination-disabled button svg) {
     fill: #9299b8 !important;
 }
+
 :global(.ant-pagination-prev button svg) {
     fill: black !important;
 }
+
 :global(.ant-pagination-next button svg) {
     fill: black !important;
 }
@@ -579,7 +617,8 @@ const getRankingStyle = (order: any) => {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    -webkit-line-clamp: 2; /* Hiển thị tối đa 2 dòng */
+    -webkit-line-clamp: 2;
+    /* Hiển thị tối đa 2 dòng */
     text-overflow: ellipsis;
 }
 
@@ -616,12 +655,14 @@ const getRankingStyle = (order: any) => {
 .challenge-inprogress {
     padding: 12px 24px 0;
 }
+
 .select-status {
     width: 8.75rem;
     align-self: flex-start;
     margin-bottom: 10px;
     margin-left: 2px;
 }
+
 .challenge-inprogress-card {
     display: flex;
     align-items: center;
@@ -737,43 +778,52 @@ const getRankingStyle = (order: any) => {
         padding-left: 0;
         padding-right: 0;
     }
+
     .challenge-inprogress-img {
-        height: calc((100vw - 78px) * 9 /16); 
-        width: 100%; 
+        height: calc((100vw - 78px) * 9 /16);
+        width: 100%;
     }
+
     .challenge-inprogress-card {
         flex-direction: column;
         padding-right: 0;
     }
+
     .challenge-inprogress-info {
         width: 100%;
         flex-direction: column;
         flex-grow: 1;
     }
+
     .challenge-inprogress-detail {
         align-items: center;
         align-self: center;
     }
 }
+
 /* Small screens (sm) */
 @media (min-width: 576px) and (max-width: 767px) {
     .challenge-container {
         padding-left: 0;
         padding-right: 0;
     }
+
     .challenge-inprogress-img {
-        height: calc((100vw - 78px) * 9 /16); 
-        width: 100%; 
+        height: calc((100vw - 78px) * 9 /16);
+        width: 100%;
     }
+
     .challenge-inprogress-card {
         flex-direction: column;
         padding-right: 0;
     }
+
     .challenge-inprogress-info {
         width: 100%;
         flex-direction: column;
         flex-grow: 1;
     }
+
     .challenge-inprogress-detail {
         align-items: center;
         align-self: center;
@@ -783,32 +833,32 @@ const getRankingStyle = (order: any) => {
 /* Medium screens (md) */
 @media (min-width: 768px) and (max-width: 991px) {
     .challenge-inprogress-img {
-        height: 16.875vh; 
-        width: 30vh;  
+        height: 16.875vh;
+        width: 30vh;
     }
 }
 
 /* Large screens (lg) */
 @media (min-width: 992px) and (max-width: 1199px) {
     .challenge-inprogress-img {
-        height: 16vh; 
-        width: 28.4444vh; 
+        height: 16vh;
+        width: 28.4444vh;
     }
 }
 
 /* Extra-large screens (xl) */
 @media (min-width: 1200px) and (max-width: 1599px) {
     .challenge-inprogress-img {
-        height: 20vh; 
-        width: 35.5556vh; 
+        height: 20vh;
+        width: 35.5556vh;
     }
 }
 
 /* Extra-extra-large screens (xxl) */
 @media (min-width: 1600px) {
     .challenge-inprogress-img {
-        height: 14vh; 
-        width: 24.8889vh; 
+        height: 14vh;
+        width: 24.8889vh;
     }
 }
 </style>

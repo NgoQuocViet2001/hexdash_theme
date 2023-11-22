@@ -17,7 +17,7 @@
                     <div class="ninjadash-datatable-filter">
                         <div class="ninjadash-datatable-filter__left left-panel">
                             <div class="ninjadash-datatable-filter__input">
-            
+
                             </div>
                         </div>
                         <div class="ninjadash-datatable-filter__right right-panel">
@@ -27,58 +27,90 @@
                                 </template>
                             </a-input>
                             <div class="ninjadash-datatable-filter__action">
-                                <sdButton type="primary" size="lg" @click="handleAdd">Thêm mới</sdButton>
+                                <sdButton type="primary" size="lg" @click="showModalCreate">Thêm mới</sdButton>
                             </div>
                         </div>
+                        <ModalCreateKhoaHoc :type="modalCreateState.type" :visible="modalCreateState.visible"
+                            :onOk="handleModalCreateOk" :onCancel="handleModalCreateCancel"
+                            :formState="modalCreateFormState" />
                     </div>
                     <TableWrapper>
-                        <a-table :columns="tableHeader" :data-source="displayedData" :pagination="false" >
-                            <template #headerCell="{ title }"><span :class="`table-head-title`">{{ title }}</span></template>
+                        <a-table :columns="tableHeader" :data-source="displayedData" :pagination="false"
+                            :scroll="{ x: 500 }" :responsive="true">
+                            <template #headerCell="{ title }"><span :class="`table-head-title`">{{ title
+                            }}</span></template>
                             <template #bodyCell="{ column, record }">
                                 <template v-if="column.key === 'tenMonHoc'">
                                     <div class="table-body-item courses-name">
-                                        <Slider :id="record.id" :arrayData="record.tenMonHoc" :handlePrevClick="()=>slide(record.id, -1)" :handleNextClick="()=>slide(record.id, 1)" :key="record.id"/>
+                                        <Slider :id="record.id" :arrayData="record.tenMonHoc"
+                                            :handlePrevClick="() => slide(record.id, -1)"
+                                            :handleNextClick="() => slide(record.id, 1)" :key="record.id" />
                                     </div>
                                 </template>
                                 <template v-else-if="column.key === 'thaoTac'">
                                     <div class="table-body-item course-operation">
-                                        <div class="course-operation-icon course-operation-edit" :id="`edit-course-${record.id}`">
+                                        <div class="course-operation-icon course-operation-edit" 
+                                            :id="`edit-course-${record.id}`" >
                                             <unicon name="edit"></unicon>
                                         </div>
-                                        <div class="course-operation-icon course-operation-delete" :id="`delete-course-${record.id}`">
+                                        <div class="course-operation-icon course-operation-delete"
+                                            :id="`delete-course-${record.id}`" @click="()=>showModalDelete(record.id)">
                                             <unicon name="trash-alt"></unicon>
                                         </div>
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <div :class="`table-body-item table-course-${column.key} ${column.key === 'tenKhoa' ? 'truncate-text' : ''}`">
+                                    <div
+                                        :class="`table-body-item table-course-${column.key} ${column.key === 'tenKhoa' ? 'truncate-text' : ''}`">
                                         {{ record[column.dataIndex] }}
                                     </div>
                                 </template>
                             </template>
                         </a-table>
                         <div class="pagination-wrapper">
-                            <a-pagination v-model="currentPage" :total="totalItem" :pageSize="pageSize" 
-                                show-size-changer @show-size-change="handleSizeChange" @change="handlePageChange" />
+                            <a-pagination v-model="currentPage" :total="totalItem" :pageSize="pageSize" show-size-changer
+                                @show-size-change="handleSizeChange" @change="handlePageChange" />
                         </div>
                     </TableWrapper>
                 </DataTableStyleWrap>
+                <ModalDelete :visible="modalDeleteState.visible" :type="modalDeleteState.type" :confirmDelete="()=>confirmDelete(modalDeleteState.currentId)" :handleCancel="handleModalDeleteCancel"/> 
+
             </div>
         </Main>
     </div>
 </template>
 <script setup lang="ts">
 //import
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import Slider from "@/views/pages/Slider.vue"
 import { TableWrapper } from "@/views/styled"
 import { DataTableStyleWrap } from "@/components/table/Style";
 import { Main } from '@/views/styled';
 import { BreadcrumbWrapperStyle } from "@/views/uiElements/ui-elements-styled";
+import ModalCreateKhoaHoc from "@/views/pages/ModalCreateKhoaHoc.vue"
+import ModalDelete from './ModalDelete.vue';
 
 const pageSize = ref(5);
 const currentPage = ref(1);
-
+let confirmLoading = ref(false);
+const modalCreateState = reactive({
+    visible: false,
+    type: 'primary',
+})
+const modalCreateFormState = reactive({
+    center: 'center1',
+    courseName: '',
+    courseSymbol: '',
+    active: false,
+    shortDesc: '',
+    avatar: [],
+    illustration: [],
+})
+const modalDeleteState = reactive({
+    visible: false,
+    type: 'primary',
+    currentId: -1,
+})
 
 const tableHeader = [
     {
@@ -322,21 +354,40 @@ const handlePageChange = (page: any) => {
 const handleDataUser = () => {
 
 }
-const handleAdd = () => {
-
+const showModalCreate = () => {
+    modalCreateState.visible = true;
+}
+const showModalDelete = (id: number) => {
+    modalDeleteState.currentId = id;
+    modalDeleteState.visible = true;
 }
 const handleSizeChange = () => {
 
 }
-const slide = (id : number, direction: any) => {
+
+const handleModalCreateOk = () => {
+    confirmLoading.value = true;
+    setTimeout(() => {
+        modalCreateState.visible = false;
+        confirmLoading.value = false;
+    }, 2000);
+}
+const confirmDelete = (id: number) => {
+    console.log("Đã xoá thành công " + id);
+}
+const handleModalCreateCancel = () => {
+    modalCreateState.visible = false;
+}
+const handleModalDeleteCancel = () => {
+    modalDeleteState.visible = false;
+    modalDeleteState.currentId = -1;
+}
+const slide = (id: number, direction: any) => {
     const container = document.querySelector(`.slide-group-${id}`);
     if (!container) return null;
-    console.log(container);
     const step = 250;
     const currentScrollLeft = container.scrollLeft;
     const newScrollLeft = currentScrollLeft + direction * step;
-    console.log(currentScrollLeft);
-    console.log(newScrollLeft);
     (container as HTMLElement).style.scrollBehavior = 'smooth';
     container.scrollLeft = newScrollLeft;
     setTimeout(() => {
@@ -349,16 +400,40 @@ const slide = (id : number, direction: any) => {
 :global(.ant-breadcrumb .ant-breadcrumb-link a) {
     color: black !important;
 }
+
 :global(.ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
     color: #8231D3 !important;
 }
+
+:global(.ant-pagination-disabled button) {
+    cursor: default !important;
+}
+
+:global(.ant-pagination-prev.ant-pagination-disabled button svg) {
+    fill: #9299b8 !important;
+}
+
+:global(.ant-pagination-next.ant-pagination-disabled button svg) {
+    fill: #9299b8 !important;
+}
+
+:global(.ant-pagination-prev button svg) {
+    fill: black !important;
+}
+
+:global(.ant-pagination-next button svg) {
+    fill: black !important;
+}
+
 .course-container {
     padding: 16px 30px 0;
 }
+
 .lmeiNC {
     display: flex;
     flex-direction: column;
 }
+
 .right-panel {
     display: flex;
 }
@@ -367,37 +442,62 @@ const slide = (id : number, direction: any) => {
     width: 30rem;
     margin-right: 10px;
 }
-div.course-content > div > div.fFruaH {
+
+div.course-content>div>div.fFruaH {
     height: 32.5rem;
     display: flex;
     flex-direction: column;
 }
-main > div > div > div.course-content > div {
+
+main>div>div>div.course-content>div {
     position: relative;
 }
+
 :global(div.pagination-wrapper > ul > li.ant-pagination-options) {
     position: absolute;
     top: 0;
     left: 0;
 }
+
 .ant-table-wrapper {
     flex-grow: 1;
 }
+
 .table-head-title {
     display: block;
     width: 100%;
     text-align: center;
 }
+
 .table-body-item {
     width: 100%;
     text-align: center;
 }
-.table-course-kyHieu, .ant-table-cell[colstart="0"] .table-head-title {
+
+.table-course-kyHieu,
+.ant-table-cell[colstart="0"] .table-head-title {
     width: 3.125rem;
 }
-.table-course-tenKhoa, .ant-table-cell[colstart="1"] .table-head-title  {
+
+.table-course-tenKhoa,
+.ant-table-cell[colstart="1"] .table-head-title {
     width: 15rem;
 }
+
+.table-course-thaoTac,
+.ant-table-cell[colstart="3"] .table-head-title {
+    width: 4rem;
+}
+
+:global(.ant-table-cell[colstart="3"]) {
+    display: flex;
+    justify-content: center;
+}
+
+.ant-table-cell[colstart="3"] .table-head-title {
+    display: block;
+}
+
 .course-content {
     flex-grow: 1;
     padding: 12px 24px 24px;
@@ -406,19 +506,25 @@ main > div > div > div.course-content > div {
     border-radius: 12px;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
+
 .course-operation {
     display: flex;
+    justify-content: space-evenly;
 }
+
 .course-operation-icon {
-    padding: 10px;
+    padding: 4px;
     cursor: pointer;
 }
+
 :global(.course-operation-edit > div > svg) {
     fill: #8231d3 !important;
 }
+
 :global(.course-operation-delete > div > svg) {
     fill: rgb(247, 92, 92) !important;
 }
+
 .pagination-wrapper {
     display: flex;
     justify-content: center;

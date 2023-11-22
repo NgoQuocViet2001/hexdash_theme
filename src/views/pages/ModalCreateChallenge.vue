@@ -1,22 +1,22 @@
 <template>
-    <div :class="StyleSheet">
+    <div >
         <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel">
         <div class="project-modal">
             <BasicFormWrapper>
                 <div class="create-challenge-form">
                     <a-form name="challenge" layout="vertical">
                         <a-form-item v-if="currentModal?.name" name="challengeName" :label="currentModal?.name">
-                            <a-input />
+                            <a-input v-model="formState.challengeName"/>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.banner" name="challengeBanner" :label="currentModal?.banner">
-                            <a-upload action="/api/upload" name="challengeUpload" :show-upload-list="false">
+                            <a-upload :action="formState.apiUpload" name="challengeUpload" v-model:file-list="formState.bannerFile" :max-count="1">
                                 <a-button>
                                     <unicon name="upload"></unicon>
                                 </a-button>
                             </a-upload>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.description" name="challengeBanner" :label="currentModal?.description">
-                            <a-textarea :rows="3" placeholder="Mô tả ngắn" />
+                            <a-textarea :rows="3" placeholder="Mô tả ngắn" v-model="formState.shortDesc"/>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.attendCount" name="challengeAttendCount"
                             :label="currentModal?.attendCount">
@@ -40,7 +40,7 @@
                             <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.level" name="challengeLevel" :label="currentModal?.level">
                                     <a-select v-model:value="formState.level" style="width: 100%">
-                                        <a-select-option value="ease">Dễ</a-select-option>
+                                        <a-select-option value="easy">Dễ</a-select-option>
                                         <a-select-option value="medium">Trung bình</a-select-option>
                                         <a-select-option value="hard">Khó</a-select-option>
                                     </a-select>
@@ -49,7 +49,7 @@
                             <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.challengeTime" name="challengeTime"
                                     :label="currentModal?.challengeTime">
-                                    <a-select v-model:value="formState.challengeTime" style="width: 100%">
+                                    <a-select v-model:value="formState.challengeTime" style="width: 100%" >
                                         <a-select-option value="time1">30 phút</a-select-option>
                                         <a-select-option value="time2">60 tiếng</a-select-option>
                                         <a-select-option value="time3">90 phút</a-select-option>
@@ -60,7 +60,7 @@
                         </a-row>
 
                         <a-row>
-                            <sdButton type="primary" size="lg">{{ currentModal?.label }}</sdButton>
+                            <sdButton type="primary" size="lg" @click="onOk">{{ currentModal?.label }}</sdButton>
                         </a-row>
                     </a-form>
                 </div>
@@ -71,7 +71,6 @@
 </template>
 
 <script setup lang="ts">
-import StyleSheet from "ant-design-vue";
 import { computed } from 'vue';
 import { BasicFormWrapper } from '@/views/styled';
 const dateFormat = 'MM/DD/YYYY';
@@ -83,9 +82,9 @@ const props = defineProps([
     'type',
     'formState',
 ]);
-const currentModal = computed(() => modalItems.find(item => item.id === props.modalID));
+const currentModal = computed(() => modalText.find(item => item.id === props.modalID));
 
-const modalItems = [
+const modalText = [
     {
         id: 1,
         label: 'Tạo giải đấu',

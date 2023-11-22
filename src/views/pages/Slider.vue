@@ -42,6 +42,7 @@ const props = defineProps(['id', 'arrayData', 'class', 'handlePrevClick', 'handl
 }
 
 .slide-group {
+    flex-grow: 1;
     display: flex;
     overflow: hidden;
     width: 42vw;
