@@ -1,12 +1,12 @@
 <template>
     <div >
-        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel" :bodyStyle="{overflowY: 'auto', maxHeight: '95vh'}">
+        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel" :bodyStyle="{overflowY: 'auto', maxHeight: '92vh'}">
         <div class="project-modal">
             <BasicFormWrapper>
                 <div class="create-challenge-form">
                     <a-form name="challenge" layout="vertical">
                         <a-form-item v-if="currentModal?.name" name="challengeName" :label="currentModal?.name">
-                            <a-input v-model="formState.challengeName"/>
+                            <a-input v-model:value="formState.challengeName"/>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.banner" name="challengeBanner" :label="currentModal?.banner">
                             <a-upload :action="formState.apiUpload" name="challengeUpload" v-model:file-list="formState.bannerFile" :max-count="1">
@@ -16,7 +16,7 @@
                             </a-upload>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.description" name="challengeBanner" :label="currentModal?.description">
-                            <a-textarea :rows="3" placeholder="Mô tả ngắn" v-model="formState.shortDesc"/>
+                            <a-textarea :rows="3" placeholder="Mô tả ngắn" v-model:value="formState.shortDesc"/>
                         </a-form-item>
                         <a-form-item v-if="currentModal?.attendCount" name="challengeAttendCount"
                             :label="currentModal?.attendCount">

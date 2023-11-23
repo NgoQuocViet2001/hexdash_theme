@@ -20,12 +20,12 @@
                     <a-row :gutter="20">
                         <a-col :xxl="8" :xl="8" :lg="8" :md="24" :sm="24" :xs="24">
                             <a-form-item name="courseName" label="Tên khoá học">
-                                <a-input v-model="formState.courseName" />
+                                <a-input v-model:value="formState.courseName" />
                             </a-form-item>
                         </a-col>
                         <a-col :xxl="8" :xl="8" :lg="8" :md="24" :sm="24" :xs="24">
                             <a-form-item name="courseSymbol" label="Ký hiệu">
-                                <a-input v-model="formState.courseSymbol" />
+                                <a-input v-model:value="formState.courseSymbol" />
                             </a-form-item>
                         </a-col>
                         <a-col :xxl="8" :xl="8" :lg="8" :md="24" :sm="24" :xs="24">
@@ -49,10 +49,10 @@
                                 <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
                                     <a-form-item name="avatar">
                                         <a-upload v-model:file-list="formState.avatar" :max-count="1"
-                                            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                                            :action="formState.apiUpload"
                                             @change="handleAvatarChange">
                                             <sdButton type="primary">
-                                                <img :src="'/src/assets/img/icon/image.png'" alt="" />
+                                                <img :src="'/src/assets/img/icon/image.png'" alt="image" />
                                                 <span>Thêm ảnh đại diện</span>
                                             </sdButton>
                                         </a-upload>
@@ -61,10 +61,10 @@
                                 <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
                                     <a-form-item name="illustration">
                                         <a-upload v-model:file-list="formState.illustration" :max-count="1"
-                                            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                                            :action="formState.apiUpload"
                                             @change="handleIllustrationChange">
                                             <sdButton type="primary">
-                                                <img :src="'/src/assets/img/icon/image.png'" alt="" />
+                                                <img :src="'/src/assets/img/icon/image.png'" alt="image" />
                                                 <span>Thêm ảnh minh hoạ</span>
                                             </sdButton>
                                         </a-upload>
@@ -76,12 +76,15 @@
                     <a-row>
                         <a-col :xxl="24" :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
                             <a-form-item name="shortDesc" label="Mô tả ngắn">
-                                <a-textarea :rows="4" placeholder="Mô tả ngắn" v-model="formState.shortDesc" />
+                                <a-textarea :rows="4" placeholder="Mô tả ngắn" v-model:value="formState.shortDesc" />
                             </a-form-item>
                         </a-col>
                     </a-row>
-                    <a-row>
-                        <sdButton type="primary" size="lg" @click="onOk">Thêm khoá học</sdButton>
+                    <a-row justify="end">
+                        <a-col :xxl="4" :xl="5" :lg="6" :md="8" :sm="10" :xs="10">
+                            <sdButton type="primary" size="lg" @click="onOk">Thêm khoá học</sdButton>
+
+                        </a-col>
                     </a-row>
                 </a-form>
             </BasicFormWrapper>
@@ -103,7 +106,6 @@ const avatarPreview = ref<string | null>(null);
 const illustrationPreview = ref<string | null>(null);
 const handleAvatarChange = (info: any) => {
     if (info.file.status === 'done') {
-        // Assuming the response contains the URL of the uploaded image
         console.log(info.file.response.url);
         avatarPreview.value = info.file.response.url;
 
@@ -134,6 +136,9 @@ const handleIllustrationChange = (info: any) => {
 }
 
 :global(.fEJzIv.ant-btn) {
+    width: 100% !important;
+}
+:global(body > div:nth-child(10) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > div > div > form > div.ant-row.ant-row-end > div > button){
     width: 100% !important;
 }
 </style>

@@ -15,11 +15,7 @@
                 <h2>Quản lý khoá học</h2>
                 <DataTableStyleWrap>
                     <div class="ninjadash-datatable-filter">
-                        <div class="ninjadash-datatable-filter__left left-panel">
-                            <div class="ninjadash-datatable-filter__input">
-
-                            </div>
-                        </div>
+                        <div class="ninjadash-datatable-filter__left left-panel"></div>
                         <div class="ninjadash-datatable-filter__right right-panel">
                             <a-input @change="handleDataUser" size="default" placeholder="Tìm kiếm" class="search-input">
                                 <template #prefix>
@@ -31,8 +27,7 @@
                             </div>
                         </div>
                         <ModalCreateKhoaHoc :type="modalCreateState.type" :visible="modalCreateState.visible"
-                            :onOk="handleModalCreateOk" :onCancel="handleModalCreateCancel"
-                            :formState="modalCreateFormState" />
+                            :onOk="createKhoaHoc" :onCancel="handleModalCreateCancel" :formState="modalCreateFormState" />
                     </div>
                     <TableWrapper>
                         <a-table :columns="tableHeader" :data-source="displayedData" :pagination="false"
@@ -49,12 +44,12 @@
                                 </template>
                                 <template v-else-if="column.key === 'thaoTac'">
                                     <div class="table-body-item course-operation">
-                                        <div class="course-operation-icon course-operation-edit" 
-                                            :id="`edit-course-${record.id}`" >
+                                        <div class="course-operation-icon course-operation-edit"
+                                            :id="`edit-course-${record.id}`" @click="() => showModalEdit(record.id)">
                                             <unicon name="edit"></unicon>
                                         </div>
                                         <div class="course-operation-icon course-operation-delete"
-                                            :id="`delete-course-${record.id}`" @click="()=>showModalDelete(record.id)">
+                                            :id="`delete-course-${record.id}`" @click="() => showModalDelete(record.id)">
                                             <unicon name="trash-alt"></unicon>
                                         </div>
                                     </div>
@@ -67,51 +62,35 @@
                                 </template>
                             </template>
                         </a-table>
-                        <div class="pagination-wrapper">
-                            <a-pagination v-model="currentPage" :total="totalItem" :pageSize="pageSize" show-size-changer
-                                @show-size-change="handleSizeChange" @change="handlePageChange" />
+                        <div class="pagination-wrapper pagination-wrapper-course">
+                            <a-pagination v-model="currentPage" :total="totalItem" :pageSize="pageSizeCourse" show-size-changer
+                                show-less-items @show-size-change="handleSizeChange" @change="handlePageChange" />
                         </div>
                     </TableWrapper>
                 </DataTableStyleWrap>
-                <ModalDelete :visible="modalDeleteState.visible" :type="modalDeleteState.type" :confirmDelete="()=>confirmDelete(modalDeleteState.currentId)" :handleCancel="handleModalDeleteCancel"/> 
-
+                <ModalDelete :visible="modalDeleteState.visible" :type="modalDeleteState.type"
+                    :confirmDelete="() => deleteKhoaHoc(modalDeleteState.currentId)"
+                    :handleCancel="handleModalDeleteCancel" />
+                <ModalEditKhoaHoc :visible="modalEditState.visible" :type="modalEditState.type"
+                    :onOk="() => updateKhoaHoc(modalEditState.currentId)" :onCancel="handleModalEditCancel"
+                    :formState="modalEditFormState" :courseSubjectTotal="getSubjectTotal(modalEditState.currentId)"
+                    :courseSubjects="getSubjectTableData(modalEditState.currentId)" :courseId="modalEditState.currentId"
+                    :deleteSubjectInCourse="deleteSubjectInCourse" />
             </div>
         </Main>
     </div>
 </template>
 <script setup lang="ts">
 //import
-import { ref, computed, onMounted, reactive } from 'vue';
-import Slider from "@/views/pages/Slider.vue"
-import { TableWrapper } from "@/views/styled"
+import { ref, computed, onMounted, reactive, watchEffect } from 'vue';
+import Slider from "@/views/pages/Slider.vue";
+import { TableWrapper } from "@/views/styled";
 import { DataTableStyleWrap } from "@/components/table/Style";
 import { Main } from '@/views/styled';
 import { BreadcrumbWrapperStyle } from "@/views/uiElements/ui-elements-styled";
-import ModalCreateKhoaHoc from "@/views/pages/ModalCreateKhoaHoc.vue"
+import ModalCreateKhoaHoc from "@/views/pages/ModalCreateKhoaHoc.vue";
+import ModalEditKhoaHoc from "@/views/pages/ModalEditKhoaHoc.vue";
 import ModalDelete from './ModalDelete.vue';
-
-const pageSize = ref(5);
-const currentPage = ref(1);
-let confirmLoading = ref(false);
-const modalCreateState = reactive({
-    visible: false,
-    type: 'primary',
-})
-const modalCreateFormState = reactive({
-    center: 'center1',
-    courseName: '',
-    courseSymbol: '',
-    active: false,
-    shortDesc: '',
-    avatar: [],
-    illustration: [],
-})
-const modalDeleteState = reactive({
-    visible: false,
-    type: 'primary',
-    currentId: -1,
-})
-
 const tableHeader = [
     {
         title: "KH",
@@ -161,8 +140,8 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 7,
-        trungTamId: 1,
+        id: 2,
+        trungTamId: 3,
         tenKhoa: "Fullstack Java Web Developer",
         tenMonHoc: [
             "C Basic",
@@ -187,8 +166,8 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 12,
-        trungTamId: 1,
+        id: 3,
+        trungTamId: 2,
         tenKhoa: "Fresher Tester",
         tenMonHoc: [
             "TF_C1_Testing Basic",
@@ -211,8 +190,8 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 14,
-        trungTamId: 1,
+        id: 4,
+        trungTamId: 2,
         tenKhoa: "ISTQB Foundation",
         tenMonHoc: [
             "Found_C0_ISTQB Introduction",
@@ -244,7 +223,7 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 15,
+        id: 5,
         trungTamId: 1,
         tenKhoa: "ISTQB Advanced Module Test Manager",
         tenMonHoc: [
@@ -266,7 +245,7 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 17,
+        id: 6,
         trungTamId: 1,
         tenKhoa: "Test Automation Developer",
         tenMonHoc: [
@@ -285,7 +264,7 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 18,
+        id: 7,
         trungTamId: 1,
         tenKhoa: "Lập trình C++",
         tenMonHoc: [
@@ -301,7 +280,7 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 19,
+        id: 8,
         trungTamId: 1,
         tenKhoa: "Frontend Developer",
         tenMonHoc: [
@@ -316,7 +295,7 @@ const courseData = [
         hienThi: false
     },
     {
-        id: 20,
+        id: 9,
         trungTamId: 1,
         tenKhoa: "Lập trình C# Winform",
         tenMonHoc: [
@@ -336,17 +315,150 @@ const courseData = [
         hienThi: false
     },
 ]
+const courseImageData = [
+    {
+        id: 1,
+        avatarUrl: "https://fsoft-academy.edu.vn/wp-content/uploads/2021/08/FS.NET_-1024x540.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 2,
+        avatarUrl: "https://fsoft-academy.edu.vn/wp-content/uploads/2021/08/FS.Java_-1024x540.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 3,
+        avatarUrl: "https://d3hi6wehcrq5by.cloudfront.net/itnavi-blog/2020/04/Tester-l%C3%A0-g%C3%AC-4.jpg",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 4,
+        avatarUrl: "https://softwaretester.careers/wp-content/uploads/2018/08/istqb-foundation-exam.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 5,
+        avatarUrl: "https://www.softwaretestinghelp.com/wp-content/qa/uploads/2020/04/ISTQB-Test-Manager-Certification-Series.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 6,
+        avatarUrl: "https://th.bing.com/th/id/OIP.RyCn3j60F_txTiYhRgLxjQHaDO?w=1024&h=447&rs=1&pid=ImgDetMain",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 7,
+        avatarUrl: "https://28tech.com.vn/assets/img/khoa-hoc/c-plus-plus.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 8,
+        avatarUrl: "https://media.geeksforgeeks.org/wp-content/cdn-uploads/20220416200936/Top-10-Front-End-Developer-Skills-That-You-Need-in-2022.png",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+    {
+        id: 9,
+        avatarUrl: "https://i.ytimg.com/vi/Q2YhTNS-VkA/maxresdefault.jpg",
+        illustrationUrl: "https://www.edureka.co/blog/wp-content/uploads/2018/11/Full-Stack-Developer-RoadMap-How-To-Become-A-Full-Stack-Developer-Edureka.png",
+    },
+];
+const centerData = [
+    {
+        id: 1,
+        tenTrungTam: 'Lotus Academy',
+        value: 'center1',
+    },
+    {
+        id: 2,
+        tenTrungTam: 'Đặng Tiến Đông',
+        value: 'center2',
+    },
+    {
+        id: 3,
+        tenTrungTam: 'Mỹ Đình',
+        value: 'center3'
+    }
+]
+const courseSubjectData = courseData.map(course => {
+    return {
+        id: course.id,
+        data: course.tenMonHoc.map((subject, index) => ({
+            id: index + 1,
+            order: index + 1,
+            name: subject,
+        })),
+    };
+});
+
 const totalItem = computed(() => {
     return courseData.length;
 })
 const displayedData = computed(() => {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = currentPage.value * pageSize.value;
+    const start = (currentPage.value - 1) * pageSizeCourse.value;
+    const end = currentPage.value * pageSizeCourse.value;
     return courseData.slice(start, end);
 })
-onMounted(() => {
+
+const pageSizeCourse = ref(5);
+const currentPage = ref(1);
+const modalCreateState = reactive({
+    visible: false,
+    type: 'primary',
+})
+const modalCreateFormState = reactive({
+    center: 'center1',
+    courseName: '',
+    courseSymbol: '',
+    active: false,
+    shortDesc: '',
+    avatar: [],
+    illustration: [],
+    apiUpload: '/api/upload'
+})
+const modalDeleteState = reactive({
+    visible: false,
+    type: 'primary',
+    currentId: -1,
+})
+const modalEditState = reactive({
+    visible: false,
+    type: 'primary',
+    currentId: -1,
+})
+const modalEditFormState = reactive({
+    center: ref(''),
+    avatarPreview: ref(''),
+    illustrationPreview: ref(''),
+    courseName: ref(''),
+    courseSymbol: ref(''),
+    active: ref(false),
+    shortDesc: ref(''),
+    avatar: ref([]),
+    illustration: ref([]),
+    apiUpload: ref('/api/upload')
+});
+const currentPageSubjects = ref([]);
+watchEffect(() => {
+    const centerId = courseData.find(item => item.id === modalEditState.currentId)?.trungTamId;
+    const center = centerData.find(item => item.id === centerId)?.tenTrungTam;
+    modalEditFormState.center = center !== undefined ? center : '';
+
+    const avatarPreview = courseImageData.find(item => item.id === modalEditState.currentId)?.avatarUrl;
+    modalEditFormState.avatarPreview = avatarPreview !== undefined ? avatarPreview : '';
+
+    const illustrationPreview = courseImageData.find(item => item.id === modalEditState.currentId)?.illustrationUrl;
+    modalEditFormState.illustrationPreview = illustrationPreview !== undefined ? illustrationPreview : '';
+
+    const courseName = courseData.find(item => item.id === modalEditState.currentId)?.tenKhoa;
+    modalEditFormState.courseName = courseName !== undefined ? courseName : '';
+
+    const courseSymbol = courseData.find(item => item.id === modalEditState.currentId)?.kyHieu;
+    modalEditFormState.courseSymbol = courseSymbol !== undefined ? courseSymbol : '';
 })
 
+onMounted(() => {
+
+})
 
 const handlePageChange = (page: any) => {
     currentPage.value = page;
@@ -361,26 +473,73 @@ const showModalDelete = (id: number) => {
     modalDeleteState.currentId = id;
     modalDeleteState.visible = true;
 }
+const showModalEdit = (id: number) => {
+    modalEditState.currentId = id;
+    modalEditState.visible = true;
+}
+const getSubjectTableData = (id: number) => {
+    const tableData = courseSubjectData.find(course => course.id == id)?.data;
+    return tableData;
+}
+const getSubjectTotal = (id: number) => {
+    const tableData = courseSubjectData.find(course => course.id == id)?.data;
+    const length = tableData?.length;
+    return length;
+}
+const deleteSubjectInCourse = (courseId: number, subjectId: number) => {
+    const tableData = courseSubjectData.find(course => course.id == courseId)?.data;
+    const subject = tableData?.find(subject => subject.id == subjectId);
+    // console.log(subject);
+    console.log("Xoá thành công môn học " + subjectId + " của khoá " + courseId);
+}
 const handleSizeChange = () => {
 
 }
 
-const handleModalCreateOk = () => {
-    confirmLoading.value = true;
+const createKhoaHoc = () => {
+    const createData = {
+        courseName: modalCreateFormState.courseName,
+        courseSymbol: modalCreateFormState.courseSymbol,
+        center: modalCreateFormState.center,
+        active: modalCreateFormState.active,
+        shortDesc: modalCreateFormState.shortDesc,
+        avatar: modalCreateFormState.avatar,
+        illustration: modalCreateFormState.illustration,
+    }
+    console.log(createData);
     setTimeout(() => {
         modalCreateState.visible = false;
-        confirmLoading.value = false;
-    }, 2000);
+    }, 1000);
 }
-const confirmDelete = (id: number) => {
-    console.log("Đã xoá thành công " + id);
+const updateKhoaHoc = (id: number) => {
+    const updateData = {
+        courseName: modalEditFormState.courseName,
+        courseSymbol: modalEditFormState.courseSymbol,
+        center: modalEditFormState.center,
+        active: modalEditFormState.active,
+        shortDesc: modalEditFormState.shortDesc,
+        avatar: modalEditFormState.avatar,
+        illustration: modalEditFormState.illustration,
+    };
+    console.log(updateData);
+    setTimeout(() => {
+        modalEditState.visible = false;
+    }, 1000);
 }
+const deleteKhoaHoc = (id: number) => {
+    console.log("Xoá thành công khoá học" + id);
+}
+
 const handleModalCreateCancel = () => {
     modalCreateState.visible = false;
 }
 const handleModalDeleteCancel = () => {
     modalDeleteState.visible = false;
     modalDeleteState.currentId = -1;
+}
+const handleModalEditCancel = () => {
+    modalEditState.visible = false;
+    modalEditState.currentId = -1;
 }
 const slide = (id: number, direction: any) => {
     const container = document.querySelector(`.slide-group-${id}`);
@@ -403,6 +562,26 @@ const slide = (id: number, direction: any) => {
 
 :global(.ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
     color: #8231D3 !important;
+}
+
+:global(.ant-pagination-disabled button) {
+    cursor: default !important;
+}
+
+:global(.ant-pagination-prev.ant-pagination-disabled button svg) {
+    fill: #9299b8 !important;
+}
+
+:global(.ant-pagination-next.ant-pagination-disabled button svg) {
+    fill: #9299b8 !important;
+}
+
+:global(.ant-pagination-prev button svg) {
+    fill: black !important;
+}
+
+:global(.ant-pagination-next button svg) {
+    fill: black !important;
 }
 
 :global(.ant-pagination-disabled button) {
@@ -453,7 +632,7 @@ main>div>div>div.course-content>div {
     position: relative;
 }
 
-:global(div.pagination-wrapper > ul > li.ant-pagination-options) {
+:global(div.pagination-wrapper-course > ul > li.ant-pagination-options) {
     position: absolute;
     top: 0;
     left: 0;

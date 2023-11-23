@@ -9,11 +9,11 @@
                         </a-col>
                     </a-row>
                     <a-row :gutter="10" justify="end">
-                        <a-col :xxl="3" :xl="3" :lg="3" :md="3" :sm="3" :xs="3">
+                        <a-col :xxl="3" :xl="3" :lg="5" :md="6" :sm="6" :xs="8">
                             <sdButton type="light" @click="handleCancel">Huỷ</sdButton>
                         </a-col>
-                        <a-col :xxl="5" :xl="5" :lg="5" :md="5" :sm="5" :xs="5">
-                            <sdButton type="primary" @click="confirmDelete">Xác nhận</sdButton>
+                        <a-col :xxl="5" :xl="5" :lg="7" :md="8" :sm="8" :xs="10">
+                            <sdButton type="danger" @click="confirmDelete">Xác nhận</sdButton>
                         </a-col>
                     </a-row>
                 </a-form>
@@ -43,5 +43,8 @@ const props = defineProps([
 :global(.ant-modal) {
     top: 0;
     padding-bottom: 0;
+}
+:global(body > div:nth-child(11) > div > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > div > div > form > div.ant-row.ant-row-end > div.ant-col.ant-col-xs-8.ant-col-sm-8.ant-col-md-6.ant-col-lg-5.ant-col-xl-3.ant-col-xxl-3 > button) {
+    width: 100% !important;
 }
 </style>
