@@ -435,9 +435,10 @@ const modalEditFormState = reactive({
     shortDesc: ref(''),
     avatar: ref([]),
     illustration: ref([]),
-    apiUpload: ref('/api/upload')
+    apiUpload: ref('/api/upload'),
+    createSubjectName: ref(''),
+    createSubjectOrder: ref(''),
 });
-const currentPageSubjects = ref([]);
 watchEffect(() => {
     const centerId = courseData.find(item => item.id === modalEditState.currentId)?.trungTamId;
     const center = centerData.find(item => item.id === centerId)?.tenTrungTam;
@@ -507,9 +508,9 @@ const createKhoaHoc = () => {
         illustration: modalCreateFormState.illustration,
     }
     console.log(createData);
-    setTimeout(() => {
-        modalCreateState.visible = false;
-    }, 1000);
+    // setTimeout(() => {
+    //     modalCreateState.visible = false;
+    // }, 1000);
 }
 const updateKhoaHoc = (id: number) => {
     const updateData = {
@@ -520,14 +521,19 @@ const updateKhoaHoc = (id: number) => {
         shortDesc: modalEditFormState.shortDesc,
         avatar: modalEditFormState.avatar,
         illustration: modalEditFormState.illustration,
+        createSubjectName: modalEditFormState.createSubjectName,
+        createSubjectOrder: modalEditFormState.createSubjectOrder
     };
     console.log(updateData);
-    setTimeout(() => {
-        modalEditState.visible = false;
-    }, 1000);
+    // setTimeout(() => {
+    //     modalEditState.visible = false;
+    // }, 1000);
 }
 const deleteKhoaHoc = (id: number) => {
     console.log("Xoá thành công khoá học" + id);
+    // setTimeout(() => {
+    //     modalDeleteState.visible = false;
+    // }, 1000);
 }
 
 const handleModalCreateCancel = () => {
