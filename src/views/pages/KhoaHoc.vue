@@ -35,8 +35,18 @@
                             <template #headerCell="{ title }"><span :class="`table-head-title`">{{ title
                             }}</span></template>
                             <template #bodyCell="{ column, record }">
-                                <template v-if="column.key === 'tenMonHoc'">
+                                <template v-if="column.key === 'kyHieu'">
+                                    <div class="table-body-item courses-abbreviations">
+                                        {{ record.kyHieu }}
+                                    </div>
+                                </template>
+                                <template v-if="column.key === 'tenKhoa'">
                                     <div class="table-body-item courses-name">
+                                        {{ record.tenKhoa }}
+                                    </div>
+                                </template>
+                                <template v-else-if="column.key === 'tenMonHoc'">
+                                    <div class="table-body-item subjects-name">
                                         <Slider :id="record.id" :arrayData="record.tenMonHoc"
                                             :handlePrevClick="() => slide(record.id, -1)"
                                             :handleNextClick="() => slide(record.id, 1)" :key="record.id" />
@@ -54,17 +64,12 @@
                                         </div>
                                     </div>
                                 </template>
-                                <template v-else>
-                                    <div
-                                        :class="`table-body-item table-course-${column.key} ${column.key === 'tenKhoa' ? 'truncate-text' : ''}`">
-                                        {{ record[column.dataIndex] }}
-                                    </div>
-                                </template>
                             </template>
                         </a-table>
                         <div class="pagination-wrapper pagination-wrapper-course">
-                            <a-pagination v-model="currentPage" :total="totalItem" :pageSize="pageSizeCourse" show-size-changer
-                                show-less-items @show-size-change="handleSizeChange" @change="handlePageChange" />
+                            <a-pagination v-model="currentPageCourse" :total="totalItem" :pageSize="pageSizeCourse"
+                                show-size-changer show-less-items @show-size-change="handleSizeChange"
+                                :page-size-options="pageSizeOptions" @change="handlePageChange" />
                         </div>
                     </TableWrapper>
                 </DataTableStyleWrap>
@@ -394,13 +399,14 @@ const totalItem = computed(() => {
     return courseData.length;
 })
 const displayedData = computed(() => {
-    const start = (currentPage.value - 1) * pageSizeCourse.value;
-    const end = currentPage.value * pageSizeCourse.value;
+    const start = (currentPageCourse.value - 1) * pageSizeCourse.value;
+    const end = currentPageCourse.value * pageSizeCourse.value;
     return courseData.slice(start, end);
 })
 
 const pageSizeCourse = ref(5);
-const currentPage = ref(1);
+const currentPageCourse = ref(1);
+const pageSizeOptions = ref<string[]>(['5', '10', '20', '40', '50']);
 const modalCreateState = reactive({
     visible: false,
     type: 'primary',
@@ -462,7 +468,7 @@ onMounted(() => {
 })
 
 const handlePageChange = (page: any) => {
-    currentPage.value = page;
+    currentPageCourse.value = page;
 }
 const handleDataUser = () => {
 
@@ -493,8 +499,8 @@ const deleteSubjectInCourse = (courseId: number, subjectId: number) => {
     // console.log(subject);
     console.log("Xoá thành công môn học " + subjectId + " của khoá " + courseId);
 }
-const handleSizeChange = () => {
-
+const handleSizeChange = (current: number, pageSize: number) => {
+    pageSizeCourse.value = pageSize;
 }
 
 const createKhoaHoc = () => {
@@ -629,7 +635,7 @@ const slide = (id: number, direction: any) => {
 }
 
 div.course-content>div>div.fFruaH {
-    height: 32.5rem;
+    min-height: 30rem;
     display: flex;
     flex-direction: column;
 }
@@ -660,19 +666,6 @@ main>div>div>div.course-content>div {
 }
 
 .table-course-kyHieu,
-.ant-table-cell[colstart="0"] .table-head-title {
-    width: 3.125rem;
-}
-
-.table-course-tenKhoa,
-.ant-table-cell[colstart="1"] .table-head-title {
-    width: 15rem;
-}
-
-.table-course-thaoTac,
-.ant-table-cell[colstart="3"] .table-head-title {
-    width: 4rem;
-}
 
 :global(.ant-table-cell[colstart="3"]) {
     display: flex;
@@ -713,5 +706,46 @@ main>div>div>div.course-content>div {
 .pagination-wrapper {
     display: flex;
     justify-content: center;
+}
+/* responsive */
+@media (max-width: 576px) {
+    .lmeiNC {
+        padding: 0;
+    }
+    .course-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* Small screens (sm) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .lmeiNC {
+        padding: 0;
+    }
+    .course-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* Medium screens (md) */
+@media (min-width: 768px) and (max-width: 991px) {
+
+}
+
+/* Large screens (lg) */
+@media (min-width: 992px) and (max-width: 1199px) {
+
+}
+
+/* Extra-large screens (xl) */
+@media (min-width: 1200px) and (max-width: 1599px) {
+
+}
+
+/* Extra-extra-large screens (xxl) */
+@media (min-width: 1600px) {
+
 }
 </style>

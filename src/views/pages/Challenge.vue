@@ -46,7 +46,7 @@
                                         <div v-else style="height: 2.375rem;"></div>
                                     </div>
                                     <div v-if=" activeKey === tab.id" class="tab-content">
-                                        <a-row :gutter= [16] v-if=" tab.id === 1 || tab.id === 2 " class="tab-list">
+                                        <a-row :gutter= [16,16] v-if=" tab.id === 1 || tab.id === 2 " class="tab-list">
                                             <a-col :xxl=" 12" :xl=" 24" :lg=" 24" :md=" 24" :sm=" 24" :xs=" 24" v-for="(  item, index  ) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
                                                 tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
                                                     tab.id === 1 && selectState === 'ended' ? displayEndedTour :
@@ -782,6 +782,9 @@ const getRankingStyle = (order: any) => {
 
 /* responsive */
 @media (max-width: 576px) {
+    .lmeiNC {
+        padding: 0;
+    }
     .challenge-container {
         padding-left: 0;
         padding-right: 0;
@@ -811,6 +814,9 @@ const getRankingStyle = (order: any) => {
 
 /* Small screens (sm) */
 @media (min-width: 576px) and (max-width: 767px) {
+    .lmeiNC {
+        padding: 0;
+    }
     .challenge-container {
         padding-left: 0;
         padding-right: 0;
