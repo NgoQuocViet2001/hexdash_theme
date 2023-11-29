@@ -17,43 +17,48 @@
             <div class="create-challenge">
                 <h2>Bắt đầu thử thách</h2>
                 <a-row :gutter=[16,8]>
-                    <a-col :xxl=" 8" :xl=" 8" :lg=" 12" :md=" 24" :sm=" 24" :xs=" 24" v-for="   item    in    challengeItems   "
-                        :key=" item.title ">
-                        <ChallengeCard :backgroundImage=" item.backgroundImage " :title=" item.title " :desc=" item.desc "
-                            :btnText=" item.btnText " :btnClick="() => showModal(item.id)" />
+                    <a-col :xxl="8" :xl="8" :lg="12" :md="24" :sm="24" :xs="24"
+                        v-for="                         item                          in                          challengeItems                         "
+                        :key="item.title">
+                        <ChallengeCard :backgroundImage="item.backgroundImage" :title="item.title" :desc="item.desc"
+                            :btnText="item.btnText" :btnClick="() => showModalCreateChallenge(item.id)" />
                     </a-col>
                 </a-row>
             </div>
-            <ModalCreateChallenge :type=" modalState.type " :visible=" modalState.visible "
-                :onOk="() => createThuThach(modalState.currentModalID)" :onCancel=" handleCancel "
-                :modalID=" modalState.currentModalID " :formState=" modalState.formState " />
+            <ModalCreateChallenge :type="modalCreateChallengeState.type" :visible="modalCreateChallengeState.visible"
+                :onOk="() => createChallenge(modalCreateChallengeState.currentModalID)"
+                :onCancel="handleModalCreateCancel" :modalID="modalCreateChallengeState.currentModalID"
+                :formState="modalCreateChallengeState.formState" />
             <!-- Phần giữa: Thử thách đang diễn ra và ranking -->
             <div class="challenge-info">
-                <a-row :gutter= [24,8]>
-                    <a-col :xxl=" 18" :xl=" 18" :lg=" 24" :md=" 24" :sm=" 24" :xs=" 24">
+                <a-row :gutter=[24,8]>
+                    <a-col :xxl="18" :xl="18" :lg="24" :md="24" :sm="24" :xs="24">
                         <div class="challenge-inprogress">
                             <h2>Thử thách đang diễn ra</h2>
-                            <TabBasic v-model:activeKey=" activeKey ">
-                                <Child v-for="(  tab, index  ) in   tabs  " :key=" index + 1">
+                            <TabBasic v-model:activeKey="activeTabKey">
+                                <Child
+                                    v-for="(tab, index) in tabs"
+                                    :key="index + 1">
                                     <template #tab><span class="tab-label">{{ tab.label }}</span></template>
                                     <div class="select-status">
-                                        <a-select v-if=" index == 0" v-model:value=" selectState " style="width: 100%"
-                                            @change=" handleChangeSelectStatus ">
+                                        <a-select v-if="index == 0" v-model:value="selectState" style="width: 100%"
+                                            @change="handleChangeSelectStatus">
                                             <a-select-option value="happening">Đang diễn ra</a-select-option>
                                             <a-select-option value="upcoming">Sắp diễn ra</a-select-option>
                                             <a-select-option value="ended">Đã diễn ra</a-select-option>
                                         </a-select>
                                         <div v-else style="height: 2.375rem;"></div>
                                     </div>
-                                    <div v-if=" activeKey === tab.id" class="tab-content">
-                                        <a-row :gutter= [16,16] v-if=" tab.id === 1 || tab.id === 2 " class="tab-list">
-                                            <a-col :xxl=" 12" :xl=" 24" :lg=" 24" :md=" 24" :sm=" 24" :xs=" 24" v-for="(  item, index  ) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
+                                    <div v-if="activeTabKey === tab.id" class="tab-content">
+                                        <a-row :gutter=[16,16] class="tab-list">
+                                            <a-col :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24" v-for="(item, index) in (tab.id === 1 && selectState === 'happening' ? displayHappeningTour :
                                                 tab.id === 1 && selectState === 'upcoming' ? displayUpcomingTour :
                                                     tab.id === 1 && selectState === 'ended' ? displayEndedTour :
-                                                        tab.id === 2 ? displayedSoloItems : [])" :key=" index ">
+                                                        tab.id === 2 ? displaySoloItem : [])" :key="index"
+                                                @click="showInfo(item)">
                                                 <div class="challenge-inprogress-card">
                                                     <div class="challenge-inprogress-info">
-                                                        <img :src=" item.poster " alt="Poster"
+                                                        <img :src="item.banner" alt="banner"
                                                             class="challenge-inprogress-img" />
                                                         <div class="challenge-inprogress-detail">
                                                             <h3 class="truncate-text">{{ item.title }}</h3>
@@ -67,67 +72,69 @@
                                         </a-row>
                                     </div>
                                     <div class="pagination-wrapper">
-                                        <sdCards v-show=" tab.id == 1 && selectState == 'happening' "
+                                        <sdCards v-show="tab.id == 1 && selectState == 'happening'"
                                             class="challenge-pagination">
-                                            <a-pagination v-model=" currentPageState.tournament.happening "
-                                                :total=" happeningTourItems " :showSizeChanger=" false"
-                                                :pageSize=" tournamentPageSize " show-less-items
-                                                @change=" handleHappeningPage " />
+                                            <a-pagination v-model="currentPageState.tournament.happening"
+                                                :total="happeningTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
+                                                @change="handleHappeningPage" />
                                         </sdCards>
-                                        <sdCards v-show=" tab.id == 1 && selectState == 'upcoming' "
+                                        <sdCards v-show="tab.id == 1 && selectState == 'upcoming'"
                                             class="challenge-pagination">
-                                            <a-pagination v-model=" currentPageState.tournament.upcoming "
-                                                :total=" upcomingTourItems " :showSizeChanger=" false"
-                                                :pageSize=" tournamentPageSize " show-less-items
-                                                @change=" handleUpcomingPage " />
+                                            <a-pagination v-model="currentPageState.tournament.upcoming"
+                                                :total="upcomingTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
+                                                @change="handleUpcomingPage" />
                                         </sdCards>
-                                        <sdCards v-show=" tab.id == 1 && selectState == 'ended' "
+                                        <sdCards v-show="tab.id == 1 && selectState == 'ended'"
                                             class="challenge-pagination">
-                                            <a-pagination v-model=" currentPageState.tournament.ended "
-                                                :total=" endedTourItems " :showSizeChanger=" false"
-                                                :pageSize=" tournamentPageSize " show-less-items
-                                                @change=" handleEndedChange " />
+                                            <a-pagination v-model="currentPageState.tournament.ended"
+                                                :total="endedTourItems" :showSizeChanger="false"
+                                                :pageSize="tournamentPageSize" show-less-items
+                                                @change="handleEndedChange" />
                                         </sdCards>
-                                        <sdCards v-show=" tab.id == 2 " class="challenge-pagination">
-                                            <a-pagination v-model=" currentPageState.solo.current "
-                                                :total=" soloTotalItems " :showSizeChanger=" false"
-                                                :pageSize=" soloPageSize " show-less-items
-                                                @change=" handleSoloPageChange " />
+                                        <sdCards v-show="tab.id == 2" class="challenge-pagination">
+                                            <a-pagination v-model="currentPageState.solo.current"
+                                                :total="soloTotalItems" :showSizeChanger="false"
+                                                :pageSize="soloPageSize" show-less-items
+                                                @change="handleSoloPageChange" />
                                         </sdCards>
                                     </div>
                                 </Child>
                             </TabBasic>
+                            <ModalTournamentInfo :visible="modalTournamentInfoState.visible"
+                                :modalInfoState="currentTournamentInfo" :type="modalTournamentInfoState.type"
+                                :on-cancel="handleTournamentModalCancel" />
                         </div>
                     </a-col>
-                    <a-col :xxl=" 6" :xl=" 6" :lg=" 24" :md=" 24" :sm=" 24" :xs=" 24">
+                    <a-col :xxl="6" :xl="6" :lg="24" :md="24" :sm="24" :xs="24">
                         <div class="ranking-top">
                             <div class="ranking-title">
                                 <h2 style="margin-bottom: 8px;">Bảng xếp hạng</h2>
                             </div>
-                            <a-list :item-layout=" 'horizontal'" :dataSource=" selectTopRankingUsers ">
+                            <a-list :item-layout="'horizontal'" :dataSource="selectTopRankingUsers">
                                 <template #renderItem="{ item }">
                                     <div class="ranking-user"
                                         :style="{ 'border-color': getRankingStyle(item.order).color }">
                                         <div class="ranking-user-avatar">
-                                            <img :src=" item.avatar " alt="Avatar" />
+                                            <img :src="item.avatar" alt="Avatar" />
                                         </div>
                                         <div class="ranking-user-meta">
                                             <h3 class="ranking-user-title"
                                                 :style="{ color: getRankingStyle(item.order).color }">
-                                                <img v-if=" getRankingStyle(item.order).icon "
-                                                    :src=" getRankingStyle(item.order).icon " alt="Ranking Icon"
+                                                <img v-if="getRankingStyle(item.order).icon"
+                                                    :src="getRankingStyle(item.order).icon" alt="Ranking Icon"
                                                     class="ranking-medal" />
-                                                <span v-else>{{ `${ item.order }.` }}</span>
+                                                <span v-else>{{ `${item.order}.` }}</span>
                                                 {{ item.name }}
                                             </h3>
-                                            <p class="ranking-user-description">{{ `Elo: ${ item.elo } | Attended:
-                                                ${ item.attended }` }}</p>
+                                            <p class="ranking-user-description">{{ `Elo: ${item.elo} | Attended:
+                                                                                            ${item.attended}` }}</p>
                                         </div>
                                     </div>
                                 </template>
                             </a-list>
-                            <Buttons class="btn-ranking-view" type="primary" @click=" toggleViewMore ">{{ viewMore ? 'Ẩn bớt'
-                                : 'Xem thêm' }}</Buttons>
+                            <Buttons class="btn-ranking-view" type="primary" @click="toggleViewMore">{{ viewMore ? 'Ẩn bớt' : 'Xem thêm' }}</Buttons>
                         </div>
                     </a-col>
                 </a-row>
@@ -138,14 +145,14 @@
   
 <script setup lang="ts">
 //import
-import { Main } from '@/views/styled';
-import { ChallengeCard } from "@/components/banners/Banners.vue";
+import { ref, computed, onMounted, reactive } from 'vue';
 import { BreadcrumbWrapperStyle } from "@/views/uiElements/ui-elements-styled";
+import { Main } from '@/views/styled';
+import { TabBasic, Child } from "@/components/tabs/Style";
+import { ChallengeCard } from "@/components/banners/Banners.vue";
 import Buttons from "@/components/buttons/Buttons.vue"
 import ModalCreateChallenge from "./ModalCreateChallenge.vue";
-import { TabBasic, Child } from "@/components/tabs/Style";
-import { ref, computed, onMounted, reactive } from 'vue';
-
+import ModalTournamentInfo from './ModalTournamentInfo.vue';
 //props 
 
 // DATA
@@ -189,189 +196,400 @@ const tabs = [
 const challengeInProgress = {
     tournament: [
         {
+            id: 1,
             title: "Đấu Đỉnh Cao",
-            poster: "https://www.educative.io/v2api/editorpage/4994081693368320/image/5898426517553152",
+            banner: "https://www.educative.io/v2api/editorpage/4994081693368320/image/5898426517553152",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Một cuộc thi lập trình hứa hẹn mang đến những thách thức đỉnh cao, đang diễn ra và đầy kịch tính.",
+            roundTotal: 10,
+            currentRound: 8,
+            attendeesLimit: 20,
+            attendeesNumber: 17,
+            rate: true,
         },
         {
+            id: 2,
             title: "Thách Thức Javascript",
-            poster: "https://assets.leetcode.com/static_assets/others/JS_30_-_240x240.png",
+            banner: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQMLuifSah0usaRn7fOECqqWBgqgpEm55hbpJXGaxu0MzDaXu2L1_aoRpBQlcqBTPONfE&usqp=CAU",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Nơi thách thức tài năng lập trình JavaScript với 10 vòng đấu.Đang diễn ra, hãy đăng ký ngay!",
+            roundTotal: 10,
+            currentRound: 6,
+            attendeesLimit: 25,
+            attendeesNumber: 18,
+            rate: true,
         },
         {
+            id: 3,
             title: "Cuộc Chiến Amazon",
-            poster: "https://assets.leetcode.com/static_assets/others/Amazon_Spring_23_High_Frequency1.png",
+            banner: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTp8whzhPJABWoYdBCzER28v-vUJR0M7GCkydR7npLW7m_jCECdon1V8jQHCl-DZEcAsG0&usqp=CAU",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp diễn ra, cuộc đấu đầy thách thức liên quan đến các vấn đề thực tế của Amazon. Hãy sẵn sàng cho hành trình!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: true,
         },
         {
+            id: 4,
             title: "CodeMasters Challenge",
-            poster: "https://leetcode.com/_next/static/images/biweekly-default-f5a8fc3be85b6c9175207fd8fd855d47.png",
+            banner: "https://leetcode.com/_next/static/images/biweekly-default-f5a8fc3be85b6c9175207fd8fd855d47.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp diễn ra, cuộc đua giữa những chuyên gia lập trình hàng đầu. Hãy chuẩn bị cho thách thức lớn!",
+            roundTotal: 12,
+            currentRound: 0,
+            attendeesLimit: 30,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
+            id: 5,
             title: "Giải Đấu SQL",
-            poster: "https://assets.leetcode.com/static_assets/others/Top_SQL_50_static_cover_picture.png",
+            banner: "https://raw.githubusercontent.com/sqlchat/sqlchat/main/public/banner.webp",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp diễn ra, cuộc đua giữa những chuyên gia lập trình hàng đầu. Hãy chuẩn bị cho thách thức lớn!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 25,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "Giải Đấu Dynamic Programming",
-            poster: "https://assets.leetcode.com/contest/biweekly-contest-85/card_img_1659801683.png",
+            id: 6,
+            title: "Hành Trình DevOps",
+            banner: "https://static.vecteezy.com/system/resources/previews/011/166/144/original/devops-banner-web-icon-illustration-concept-for-software-engineering-and-development-with-an-icon-of-a-plan-code-build-test-release-deploy-operate-and-monitor-vector.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp diễn ra, cuộc đua giữa những chuyên gia lập trình hàng đầu. Hãy chuẩn bị cho thách thức lớn!",
+            roundTotal: 15,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: true,
         },
         {
+            id: 7,
             title: "Kĩ thuật thực nghiệm code",
-            poster: "https://assets.leetcode.com/static_assets/others/Dynamic_Programming_static_cover_picture.png",
+            banner: "https://assets.leetcode.com/contest/weekly-contest-374/card_img_1700975397.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp diễn ra, cuộc đua giữa những chuyên gia lập trình hàng đầu. Hãy chuẩn bị cho thách thức lớn!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 50,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "Thuật Toán Vô Song",
-            poster: "https://assets.leetcode.com/study_plan_v2/programming-skills/cover",
+            id: 8,
+            title: "Lập Trình Cùng Nhau",
+            banner: "https://as1.ftcdn.net/v2/jpg/03/34/08/56/1000_F_334085607_sEmtAJfRwpR3GTV2gcE1TJtp9W9SLcr3.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "ended",
+            shortDescription: "Đã kết thúc, sự kiện lập trình độc đáo với 10 vòng đấu đã thu hút ",
+            roundTotal: 10,
+            currentRound: 10,
+            attendeesLimit: 20,
+            attendeesNumber: 17,
+            rate: true,
         },
         {
+            id: 9,
             title: "Thách Thức HackerRank",
-            poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnuVnHrtRouWTFgSkjp49VZal0bT3crXyWrA&usqp=CAU",
+            banner: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnuVnHrtRouWTFgSkjp49VZal0bT3crXyWrA&usqp=CAU",
             startTime: "2023-11-09 10:00 AM",
             status: "ended",
+            shortDescription: "Đã kết thúc, sự kiện lập trình độc đáo với 12 vòng đấu đã thu hút ",
+            roundTotal: 12,
+            currentRound: 12,
+            attendeesLimit: 25,
+            attendeesNumber: 20,
+            rate: true,
         },
         {
+            id: 10,
             title: "Đại Chiến Strings",
-            poster: "https://cdn-blog.28tech.com.vn/media/c%2B%2B%20tutorial/string/string%20trong%20cpp.png",
+            banner: "https://cdn-blog.28tech.com.vn/media/c%2B%2B%20tutorial/string/string%20trong%20cpp.png",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, đối đầu với các thách thức xử lý chuỗi trong 8 vòng. Hãy tham gia và chứng minh tài năng của bạn!",
+            roundTotal: 8,
+            currentRound: 4,
+            attendeesLimit: 15,
+            attendeesNumber: 12,
+            rate: false,
         },
         {
-            title: "Lập trình viên siêu cấp",
-            poster: "https://yt3.googleusercontent.com/A0i8xdbzNoYrO6dGSoS3eBPUAnhKmU9MDXtS0xI2kD6buLEi8klyPfLpIkmUkhOiZ4mEAj6wSQ=s900-c-k-c0x00ffffff-no-rj",
+            id: 11,
+            title: "Lãnh Thổ Code Phương Đông",
+            banner: "https://img.freepik.com/premium-vector/web-development-coding-programming-futuristic-banner-computer-code-laptop_3482-5582.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Một cuộc thi lập trình hấp dẫn, đang diễn ra với 10 vòng đấu. Thách thức kiến thức và kỹ năng của bạn trong không khí đầy phong cách Phương Đông.",
+            roundTotal: 10,
+            currentRound: 5,
+            attendeesLimit: 25,
+            attendeesNumber: 20,
+            rate: false,
         },
         {
+            id: 12,
             title: "Lập Trình Nghệ Thuật",
-            poster: "https://repository-images.githubusercontent.com/72586805/05dd0b80-6b7c-11e9-9cf5-15d6d7efb700",
+            banner: "https://repository-images.githubusercontent.com/72586805/05dd0b80-6b7c-11e9-9cf5-15d6d7efb700",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc thi lập trình nghệ thuật với 8 vòng đấu. Một nơi để biểu diễn sự sáng tạo của bạn thông qua mã nguồn.",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
+            id: 13,
             title: "Nghệ Sĩ Code Đỉnh Cao",
-            poster: "https://assets.leetcode.com/contest/weekly-contest-291/card_img_1654267951.png",
+            banner: "https://assets.leetcode.com/contest/weekly-contest-291/card_img_1654267951.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, sân khấu cho những nghệ sĩ lập trình xuất sắc. Hãy sẵn sàng để chứng minh đẳng cấp của bạn.",
+            roundTotal: 10,
+            currentRound: 0,
+            attendeesLimit: 20,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "Đấu Đỉnh Cao",
-            poster: "https://www.educative.io/v2api/editorpage/4994081693368320/image/5898426517553152",
+            id: 14,
+            title: "Combat C++ Code",
+            banner: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmPg_cp3mS-_HdcWIjflEV09hNPxLI-E5k4Jupb2uILcuJt7V_6ekRLURuk5uGFxfq1mg&usqp=CAU",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, cuộc đấu với 12 vòng thách thức cho các chiến binh lập trình C++. Hãy thể hiện sức mạnh của bạn!",
+            roundTotal: 12,
+            currentRound: 8,
+            attendeesLimit: 30,
+            attendeesNumber: 25,
+            rate: false,
         },
         {
-            title: "Thách Thức Javascript",
-            poster: "https://assets.leetcode.com/static_assets/others/JS_30_-_240x240.png",
+            id: 15,
+            title: "Đấu trí trí tuệ nhân tạo",
+            banner: "https://c8.alamy.com/comp/RPM14T/artificial-intelligence-abstract-concept-banner-digital-mind-analyzes-data-information-ai-connection-with-neural-network-solves-business-tasks-RPM14T.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, cuộc đối đầu thông minh với trí tuệ nhân tạo qua 10 vòng đấu. Hãy thách thức bản thân và máy tính!",
+            roundTotal: 10,
+            currentRound: 6,
+            attendeesLimit: 20,
+            attendeesNumber: 18,
+            rate: false,
         },
         {
-            title: "Cuộc Chiến Amazon",
-            poster: "https://assets.leetcode.com/static_assets/others/Amazon_Spring_23_High_Frequency1.png",
+            id: 16,
+            title: "Đại Chiến Sửa Lỗi Mã",
+            banner: "https://fiverr-res.cloudinary.com/images/q_auto,f_auto/gigs/281651325/original/0972de277750b649ebd7f8dec9ce2363cd3041d0/fix-your-website-bugs.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc chiến chống lại lỗi mã với 8 vòng đấu. Hãy chuẩn bị cho cuộc hành trình khám phá và sửa lỗi!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "CodeMasters Challenge",
-            poster: "https://leetcode.com/_next/static/images/biweekly-default-f5a8fc3be85b6c9175207fd8fd855d47.png",
+            id: 17,
+            title: "Thử Nghiệm TestCraft",
+            banner: "https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2020_08_Software-Testing-Interview-Questions.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, bảng thử nghiệm với 10 vòng đấu. Hãy trải nghiệm và kiểm chứng kỹ năng kiểm thử của bạn!",
+            roundTotal: 10,
+            currentRound: 0,
+            attendeesLimit: 20,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "Giải Đấu SQL",
-            poster: "https://assets.leetcode.com/static_assets/others/Top_SQL_50_static_cover_picture.png",
+            id: 18,
+            title: "Đấu Trí UI/UX",
+            banner: "https://s3-us-west-2.amazonaws.com/aa.techdemand.io/wp-content/uploads/2023/06/20201459/UI-1024x614.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, đối đầu với thách thức thiết kế giao diện và trải nghiệm người dùng trong 8 vòng đấu.",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
+            id: 19,
             title: "Giải Đấu Dynamic Programming",
-            poster: "https://assets.leetcode.com/contest/biweekly-contest-85/card_img_1659801683.png",
+            banner: "https://assets.leetcode.com/contest/biweekly-contest-85/card_img_1659801683.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, đấu trí với các bài toán quy hoạch động qua 10 vòng đấu. Hãy thể hiện sự linh hoạt của bạn!",
+            roundTotal: 10,
+            currentRound: 0,
+            attendeesLimit: 20,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
-            title: "Kĩ thuật thực nghiệm code",
-            poster: "https://assets.leetcode.com/static_assets/others/Dynamic_Programming_static_cover_picture.png",
+            id: 20,
+            title: "Cuộc Đua Lập Trình C# Velocity",
+            banner: "https://repository-images.githubusercontent.com/142085119/ea2c0680-cc17-11eb-894c-501560eca79b",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc đua với tốc độ lập trình C# trong 8 vòng đấu. Hãy làm nhanh và chính xác!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: false,
         },
         {
+            id: 21,
             title: "Thuật Toán Vô Song",
-            poster: "https://assets.leetcode.com/study_plan_v2/programming-skills/cover",
+            banner: "https://assets.leetcode.com/study_plan_v2/programming-skills/cover",
             startTime: "2023-11-09 10:00 AM",
             status: "ended",
+            shortDescription: "Đã kết thúc, cuộc thi thuật toán với 10 vòng đấu đã chứng kiến sự đỉnh cao của các bậc thầy thuật toán.",
+            roundTotal: 10,
+            currentRound: 10,
+            attendeesLimit: 20,
+            attendeesNumber: 20,
+            rate: false,
         },
         {
-            title: "Thách Thức HackerRank",
-            poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnuVnHrtRouWTFgSkjp49VZal0bT3crXyWrA&usqp=CAU",
+            id: 22,
+            title: "Sàn Đấu FullStack",
+            banner: "https://www.sazanconsulting.com/wp-content/uploads/2014/04/AAEAAQAAAAAAAAedAAAAJDMzNDYxN2I5LThmYTQtNDAxYy05OTc4LWEwN2E3YTdlY2EyZg.jpg",
             startTime: "2023-11-09 10:00 AM",
             status: "ended",
+            shortDescription: "Đã kết thúc, cuộc đua FullStack với 10 vòng đấu đã chứng kiến sự xuất sắc của những người lập trình toàn diện.",
+            roundTotal: 10,
+            currentRound: 10,
+            attendeesLimit: 25,
+            attendeesNumber: 25,
+            rate: true,
         },
         {
-            title: "Đại Chiến Strings",
-            poster: "https://cdn-blog.28tech.com.vn/media/c%2B%2B%20tutorial/string/string%20trong%20cpp.png",
+            id: 23,
+            title: "Mê Cung Mã Lệnh",
+            banner: "https://media.istockphoto.com/id/996484184/vector/isometric-programmer-coding-new-project-sitting-on-computer-with-command-line-web-development.jpg?s=612x612&w=0&k=20&c=sQph1gA5gNwZN8gCql4Lpc4RtsiSSWkqcEsiR_RL3Ug=",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, một cuộc phiêu lưu trong mê cung mã lệnh với 12 vòng đấu. Hãy khám phá và tìm đường thoát!",
+            roundTotal: 12,
+            currentRound: 6,
+            attendeesLimit: 30,
+            attendeesNumber: 25,
+            rate: true,
         },
         {
+            id: 24,
             title: "Lập trình viên siêu cấp",
-            poster: "https://yt3.googleusercontent.com/A0i8xdbzNoYrO6dGSoS3eBPUAnhKmU9MDXtS0xI2kD6buLEi8klyPfLpIkmUkhOiZ4mEAj6wSQ=s900-c-k-c0x00ffffff-no-rj",
+            banner: "https://yt3.googleusercontent.com/A0i8xdbzNoYrO6dGSoS3eBPUAnhKmU9MDXtS0xI2kD6buLEi8klyPfLpIkmUkhOiZ4mEAj6wSQ=s900-c-k-c0x00ffffff-no-rj",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, cuộc chiến giữa những lập trình viên siêu cấp qua 10 vòng đấu. Hãy chứng minh bạn là người xuất sắc nhất!",
+            roundTotal: 10,
+            currentRound: 4,
+            attendeesLimit: 20,
+            attendeesNumber: 18,
+            rate: true,
         },
         {
+            id: 25,
             title: "Lập Trình Nghệ Thuật",
-            poster: "https://repository-images.githubusercontent.com/72586805/05dd0b80-6b7c-11e9-9cf5-15d6d7efb700",
+            banner: "https://repository-images.githubusercontent.com/72586805/05dd0b80-6b7c-11e9-9cf5-15d6d7efb700",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc thi lập trình nghệ thuật với 8 vòng đấu. Một nơi để biểu diễn sự sáng tạo của bạn thông qua mã nguồn.",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: true,
         },
         {
+            id: 26,
             title: "Nghệ Sĩ Code Đỉnh Cao",
-            poster: "https://assets.leetcode.com/contest/weekly-contest-291/card_img_1654267951.png",
+            banner: "https://assets.leetcode.com/contest/weekly-contest-291/card_img_1654267951.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, sân khấu cho những nghệ sĩ lập trình xuất sắc. Hãy sẵn sàng để chứng minh đẳng cấp của bạn.",
+            roundTotal: 10,
+            currentRound: 0,
+            attendeesLimit: 20,
+            attendeesNumber: 0,
+            rate: true,
         },
         {
-            title: "Đấu Đỉnh Cao",
-            poster: "https://www.educative.io/v2api/editorpage/4994081693368320/image/5898426517553152",
+            id: 27,
+            title: "Chinh Phục API",
+            banner: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxPl-Ki8e6GGvAJwc303g00R5LtgvjOwgIt8iSbnO9U7HuAtKTVLfRhR_BUL_QtvoPU6E&usqp=CAU",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, cuộc đua chinh phục API với 12 vòng đấu. Hãy kiểm tra và làm chủ các giao diện lập trình ứng dụng!",
+            roundTotal: 12,
+            currentRound: 8,
+            attendeesLimit: 30,
+            attendeesNumber: 25,
+            rate: true,
         },
         {
-            title: "Thách Thức Javascript",
-            poster: "https://assets.leetcode.com/static_assets/others/JS_30_-_240x240.png",
+            id: 28,
+            title: "Tranh Tài ReactJS",
+            banner: "https://kinsta.com/wp-content/uploads/2022/06/what-is-react-js-feature-image-1024x512.png",
             startTime: "2023-11-09 10:00 AM",
             status: "happening",
+            shortDescription: "Đang diễn ra, cuộc tranh tài sôi động về ReactJS qua 10 vòng đấu. Hãy thể hiện kỹ năng của bạn trong lập trình giao diện người dùng!",
+            roundTotal: 10,
+            currentRound: 6,
+            attendeesLimit: 25,
+            attendeesNumber: 20,
+            rate: true,
         },
         {
-            title: "Cuộc Chiến Amazon",
-            poster: "https://assets.leetcode.com/static_assets/others/Amazon_Spring_23_High_Frequency1.png",
+            id: 29,
+            title: "Đại Hội Dev: C# vs. Java",
+            banner: "https://www.nilebits.com/wp-content/uploads/2022/09/C-vs-Java-What-To-Choose-For-Your-Next-Application-1140x445.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc so tài giữa C# và Java với 8 vòng đấu. Hãy lựa chọn hệ sinh thái lập trình của bạn!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 15,
+            attendeesNumber: 0,
+            rate: true,
         },
         {
-            title: "CodeMasters Challenge",
-            poster: "https://leetcode.com/_next/static/images/biweekly-default-f5a8fc3be85b6c9175207fd8fd855d47.png",
+            id: 30,
+            title: "JavaFX Đấu Trí",
+            banner: "https://cloud.z.com/vn/wp-content/uploads/2023/06/word-image-68490-5.png",
             startTime: "2023-11-09 10:00 AM",
             status: "upcoming",
+            shortDescription: "Sắp tới, cuộc đấu trí sôi động với JavaFX qua 8 vòng đấu. Hãy thể hiện tài năng lập trình của bạn trên nền tảng Java!",
+            roundTotal: 8,
+            currentRound: 0,
+            attendeesLimit: 20,
+            attendeesNumber: 12,
+            rate: true,
         },
     ],
     solo: Array.from({ length: 70 }, (_, index) => ({
+        id: index + 1,
         title: `So tài ${index + 1}`,
-        poster: "https://assets.leetcode.com/contest/weekly-contest-290/card_img_1654267980.png",
+        banner: "https://assets.leetcode.com/contest/weekly-contest-290/card_img_1654267980.png",
         startTime: "2023-11-09 10:00 AM",
         status: "10 phút",
     })),
@@ -386,11 +604,16 @@ const topRankingUsers = Array.from({ length: 20 }, (_, index) => ({
 }));
 
 //REFS
+let activeTabKey = ref(1);
+const tournamentPageSize = ref(12);
+const soloPageSize = ref(12);
+let viewMore = ref(false);
+
 //formstate
-const modalState = reactive({
+const modalCreateChallengeState = reactive({
     currentModalID: 0,
     formState: computed(() => {
-        switch (modalState.currentModalID) {
+        switch (modalCreateChallengeState.currentModalID) {
             case 1:
                 return tournamentFormState;
             case 2:
@@ -426,7 +649,6 @@ const trainFormState = reactive({
     challengeTime: 'time1',
 
 });
-let activeKey = ref(1);
 
 let selectState = ref('happening');
 const currentPageState = reactive({
@@ -439,11 +661,10 @@ const currentPageState = reactive({
         current: 1
     }
 })
-// let soloCurrentPage = ref(1);
-const tournamentPageSize = ref(12);
-const soloPageSize = ref(12);
-let viewMore = ref(false);
-
+const modalTournamentInfoState = reactive({
+    type: 'primay',
+    visible: false,
+})
 // MOUNTED
 onMounted(() => {
 
@@ -491,25 +712,24 @@ const displayEndedTour = computed(() => {
     return items.filter(item => item.status === 'ended').slice(startIndex, endIndex);
 });
 
-
-const displayedSoloItems = computed(() => {
+const displaySoloItem = computed(() => {
     const items = challengeInProgress.solo;
     const startIndex = (currentPageState.solo.current - 1) * soloPageSize.value;
     const endIndex = startIndex + soloPageSize.value;
     return items.slice(startIndex, endIndex);
 });
 
-let selectTopRankingUsers = computed(() => {
+const selectTopRankingUsers = computed(() => {
     return viewMore.value ? topRankingUsers : topRankingUsers.slice(0, 10);
 });
-
+const currentTournamentInfo = ref({});
 //METHODS
 
-const showModal = (id: number) => {
-    modalState.currentModalID = id;
-    modalState.visible = true;
+const showModalCreateChallenge = (id: number) => {
+    modalCreateChallengeState.currentModalID = id;
+    modalCreateChallengeState.visible = true;
 }
-const createThuThach = (id: number) => {
+const createChallenge = (id: number) => {
     switch (id) {
         case 1:
             const createTournamentData = {
@@ -544,11 +764,11 @@ const createThuThach = (id: number) => {
     }
 
     setTimeout(() => {
-        modalState.visible = false;
+        modalCreateChallengeState.visible = false;
     }, 1000);
 }
-const handleCancel = () => {
-    modalState.visible = false;
+const handleModalCreateCancel = () => {
+    modalCreateChallengeState.visible = false;
 }
 const handleHappeningPage = (page: any) => {
     currentPageState.tournament.happening = page;
@@ -562,6 +782,19 @@ const handleEndedChange = (page: any) => {
 const handleSoloPageChange = (page: any) => {
     currentPageState.solo.current = page;
 };
+const showInfo = (clickedItem : any) => {
+    if (activeTabKey.value == 1) {
+        currentTournamentInfo.value = { ...clickedItem };
+        showTournamentModal();
+    }
+    else return;
+}
+const showTournamentModal = () => {
+    modalTournamentInfoState.visible = true;
+}
+const handleTournamentModalCancel = () => {
+    modalTournamentInfoState.visible = false;
+}
 const toggleViewMore = () => {
     viewMore.value = !viewMore.value;
 }
@@ -592,42 +825,46 @@ const getRankingStyle = (order: any) => {
 
 <style scoped>
 /* css breadcrumb mặc định */
-:global(.ant-breadcrumb .ant-breadcrumb-link a) {
+:global(.challenge-container .ant-breadcrumb .ant-breadcrumb-link a) {
     color: black !important;
 }
 
-:global(.ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
+:global(.challenge-container .ant-breadcrumb .ant-breadcrumb-link .router-link-active) {
     color: #8231D3 !important;
 }
 
 /* css pagination */
-:global(.ant-pagination-disabled button) {
+:global(.challenge-container .ant-pagination-disabled button) {
     cursor: default !important;
 }
 
-:global(.ant-pagination-prev.ant-pagination-disabled button svg) {
+:global(.challenge-container .ant-pagination-prev.ant-pagination-disabled button svg) {
     fill: #9299b8 !important;
 }
 
-:global(.ant-pagination-next.ant-pagination-disabled button svg) {
+:global(.challenge-container .ant-pagination-next.ant-pagination-disabled button svg) {
     fill: #9299b8 !important;
 }
 
-:global(.ant-pagination-prev button svg) {
+:global(.challenge-container .ant-pagination-prev button svg) {
     fill: black !important;
 }
 
-:global(.ant-pagination-next button svg) {
+:global(.challenge-container .ant-pagination-next button svg) {
     fill: black !important;
 }
 
-:global(.truncate-text) {
+:global(.challenge-container .truncate-text) {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
     -webkit-line-clamp: 2;
     /* Hiển thị tối đa 2 dòng */
     text-overflow: ellipsis;
+}
+
+:global(.challenge-container .ant-tabs.ant-tabs-top.kMfGPw) {
+    position: relative;
 }
 
 .challenge-container {
@@ -648,7 +885,7 @@ const getRankingStyle = (order: any) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 112vh;
+    min-height: 106vh;
 }
 
 .tab-content {
@@ -667,8 +904,9 @@ const getRankingStyle = (order: any) => {
 .select-status {
     width: 8.75rem;
     align-self: flex-start;
-    margin-bottom: 10px;
-    margin-left: 2px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
 }
 
 .challenge-inprogress-card {
@@ -785,6 +1023,7 @@ const getRankingStyle = (order: any) => {
     .lmeiNC {
         padding: 0;
     }
+
     .challenge-container {
         padding-left: 0;
         padding-right: 0;
@@ -817,6 +1056,7 @@ const getRankingStyle = (order: any) => {
     .lmeiNC {
         padding: 0;
     }
+
     .challenge-container {
         padding-left: 0;
         padding-right: 0;

@@ -1,22 +1,24 @@
 <template>
-    <div >
-        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel" :bodyStyle="{overflowY: 'auto', maxHeight: '92vh'}">
-        <div class="project-modal">
+    <div class="create-challenge-modal">
+        <sdModal :title="currentModal?.label" :type="type" :visible="visible" :onOk="onOk" :onCancel="onCancel"
+            :bodyStyle="{ overflowY: 'auto', maxHeight: '92vh' }">
             <BasicFormWrapper>
                 <div class="create-challenge-form">
                     <a-form name="challenge" layout="vertical">
                         <a-form-item v-if="currentModal?.name" name="challengeName" :label="currentModal?.name">
-                            <a-input v-model:value="formState.challengeName"/>
+                            <a-input v-model:value="formState.challengeName" />
                         </a-form-item>
                         <a-form-item v-if="currentModal?.banner" name="challengeBanner" :label="currentModal?.banner">
-                            <a-upload :action="formState.apiUpload" name="challengeUpload" v-model:file-list="formState.bannerFile" :max-count="1">
+                            <a-upload :action="formState.apiUpload" name="challengeUpload"
+                                v-model:file-list="formState.bannerFile" :max-count="1">
                                 <a-button>
                                     <unicon name="upload"></unicon>
                                 </a-button>
                             </a-upload>
                         </a-form-item>
-                        <a-form-item v-if="currentModal?.description" name="challengeBanner" :label="currentModal?.description">
-                            <a-textarea :rows="3" placeholder="Mô tả ngắn" v-model:value="formState.shortDesc"/>
+                        <a-form-item v-if="currentModal?.description" name="challengeBanner"
+                            :label="currentModal?.description">
+                            <a-textarea :rows="3" placeholder="Mô tả ngắn" v-model:value="formState.shortDesc" />
                         </a-form-item>
                         <a-form-item v-if="currentModal?.attendCount" name="challengeAttendCount"
                             :label="currentModal?.attendCount">
@@ -49,7 +51,7 @@
                             <a-col :xxl="12" :xl="12" :lg="12" :md="12" :sm="12" :xs="24">
                                 <a-form-item v-if="currentModal?.challengeTime" name="challengeTime"
                                     :label="currentModal?.challengeTime">
-                                    <a-select v-model:value="formState.challengeTime" style="width: 100%" >
+                                    <a-select v-model:value="formState.challengeTime" style="width: 100%">
                                         <a-select-option value="time1">30 phút</a-select-option>
                                         <a-select-option value="time2">60 tiếng</a-select-option>
                                         <a-select-option value="time3">90 phút</a-select-option>
@@ -65,8 +67,7 @@
                     </a-form>
                 </div>
             </BasicFormWrapper>
-        </div>
-    </sdModal>
+        </sdModal>
     </div>
 </template>
 
@@ -118,15 +119,17 @@ const modalText = [
 
 <style scoped>
 /* css modal */
-:global(.ant-modal-wrap) {
+:global(body > div:nth-child(10) > div > div.ant-modal-wrap) {
     display: flex;
     align-items: center;
     justify-content: center;
 }
-:global(.ant-modal) {
+
+:global(body > div:nth-child(10) > div > div.ant-modal-wrap > div) {
     top: 0;
     padding-bottom: 0;
 }
+
 .ant-picker {
     width: 100%;
 }
